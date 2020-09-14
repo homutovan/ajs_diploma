@@ -1,7 +1,7 @@
 {
-  "name": "starter",
+  "name": "ajs_diploma",
   "version": "1.0.0",
-  "description": "js env starter",
+  "description": "ajs_diploma",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development",
@@ -16,12 +16,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/homutovan/starter.git"
+    "url": "git+https://github.com/homutovan/ajs_diploma.git"
   },
   "bugs": {
-    "url": "https://github.com/homutovan/starter/issues"
+    "url": "https://github.com/homutovan/ajs_diploma/issues"
   },
-  "homepage": "https://github.com/homutovan/starter#readme",
+  "homepage": "https://github.com/homutovan/ajs_diploma#readme",
   "author": "homutovan",
   "license": "ISC",
   "devDependencies": {
