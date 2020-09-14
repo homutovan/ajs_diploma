@@ -1,11 +1,9 @@
 import Character, { charStats } from './Character';
 
-const typeList = Object.keys(charStats).slice(0, -1).map((type) => {
-  return class Type extends Character {
-    constructor(level) {
-      super(level, type);
-    }
-  };
+const typeList = Object.keys(charStats).slice(0, -1).map((type) => class Type extends Character {
+  constructor(level) {
+    super(level, type);
+  }
 });
 
 /**
