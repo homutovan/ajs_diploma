@@ -1,6 +1,8 @@
-# js env starter
+[![Build status](https://ci.appveyor.com/api/projects/status/7wv4fyw03hlvmblb/branch/master?svg=true)](https://ci.appveyor.com/project/homutovan/ajs-diploma/branch/master)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/pgje30jtk2oevnyy/branch/master?svg=true)](https://ci.appveyor.com/project/homutovan/starter/branch/master)
+# AJS. Retro Game
+
+## Netology. Advanced JS.
 
 ### Installation
 
