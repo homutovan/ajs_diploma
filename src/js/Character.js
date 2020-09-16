@@ -23,10 +23,6 @@ export const charStats = {
     attack: 10,
     defence: 40,
   },
-  // generic: {
-  //   attack: 0,
-  //   defence: 0,
-  // },
 };
 
 export default class Character {
