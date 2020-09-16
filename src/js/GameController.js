@@ -11,7 +11,7 @@ export default class GameController {
 
   init() {
     this.gamePlay.drawUi('prairie');
-    this.position = generatePosition([...characterGenerator(typeList, 2), 
+    this.position = generatePosition([...characterGenerator(typeList, 2),
       ...characterGenerator(typeList, 3),
       ...characterGenerator(typeList, 4),
       ...characterGenerator(typeList, 4),
