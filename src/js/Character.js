@@ -1,32 +1,32 @@
 export const charStats = {
-  Bowman: {
+  bowman: {
     attack: 25,
     defence: 25,
   },
-  Swordsman: {
+  swordsman: {
     attack: 40,
     defence: 10,
   },
-  Magician: {
+  magician: {
     attack: 10,
     defence: 40,
   },
-  Vampire: {
+  vampire: {
     attack: 25,
     defence: 25,
   },
-  Undead: {
+  undead: {
     attack: 40,
     defence: 10,
   },
-  Daemon: {
+  daemon: {
     attack: 10,
     defence: 40,
   },
-  generic: {
-    attack: 0,
-    defence: 0,
-  },
+  // generic: {
+  //   attack: 0,
+  //   defence: 0,
+  // },
 };
 
 export default class Character {

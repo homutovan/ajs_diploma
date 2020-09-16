@@ -1,6 +1,6 @@
 import Character, { charStats } from './Character';
 
-const typeList = Object.keys(charStats).slice(0, -1).map((type) => class Type extends Character {
+export const typeList = Object.keys(charStats).slice(0, -1).map((type) => class Type extends Character {
   constructor(level) {
     super(level, type);
   }
@@ -14,7 +14,9 @@ const typeList = Object.keys(charStats).slice(0, -1).map((type) => class Type ex
  * @returns Character type children (ex. Magician, Bowman, etc)
  */
 export function* characterGenerator(allowedTypes, maxLevel) {
-  yield new allowedTypes[Math.round(Math.random() * allowedTypes.length)](maxLevel);
+  const type = Math.round(Math.random() * allowedTypes.length)
+  const level = Math.round(Math.random() * maxLevel)
+  yield new allowedTypes[type](level);
 }
 
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
