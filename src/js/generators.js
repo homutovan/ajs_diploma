@@ -16,15 +16,26 @@ export const typeList = Object.keys(charStats).map((type) => class extends Chara
  */
 export function* characterGenerator(allowedTypes, maxLevel) {
   const type = Math.floor(Math.random() * allowedTypes.length);
-  const level = Math.round(Math.random() * maxLevel);
+  const level = Math.floor(Math.random() * maxLevel) + 1;
   yield new allowedTypes[type](level);
 }
 
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
-  return [characterGenerator(typeList, 1), characterGenerator(typeList, 1)];
+  const team = [];
+  while (team.length < characterCount) {
+    team.push(...characterGenerator(allowedTypes, maxLevel));
+  }
+  return team;
 }
 
-export function generatePosition(characterList) {
-  const position = Array(characterList.length).fill(1).map(() => Math.floor(Math.random() * 64));
+export function generatePosition(characterList, boardSize, side) {
+  const restrictor = (_, i) => side === 'good' ? i * boardSize : i * boardSize + boardSize - 2;
+  const vertLine = Array(boardSize).fill('').map(restrictor);
+  const availablePosition = [...vertLine, ...vertLine.map((el) => el + 1)];
+  const position = [];
+  while (position.length < characterList.length) {
+    const point = availablePosition[Math.floor(Math.random() * boardSize * 2)];
+    if (!position.includes(point)) position.push(point);
+  }
   return characterList.map((character, i) => new PositionedCharacter(character, position[i]));
 }

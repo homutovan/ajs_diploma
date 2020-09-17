@@ -2,26 +2,44 @@ export const charStats = {
   bowman: {
     attack: 25,
     defence: 25,
+    distance: 2,
+    range: 2,
+    side: 'good',
   },
   swordsman: {
     attack: 40,
     defence: 10,
+    distance: 4,
+    range: 1,
+    side: 'good',
   },
   magician: {
     attack: 10,
     defence: 40,
+    distance: 1,
+    range: 4,
+    side: 'good',
   },
   vampire: {
     attack: 25,
     defence: 25,
+    distance: 2,
+    range: 2,
+    side: 'evil',
   },
   undead: {
     attack: 40,
     defence: 10,
+    distance: 4,
+    range: 1,
+    side: 'evil',
   },
   daemon: {
     attack: 10,
     defence: 40,
+    distance: 1,
+    range: 4,
+    side: 'evil',
   },
 };
 
@@ -43,7 +61,13 @@ export default class Character {
     if (charStats[value] === undefined) {
       throw new Error('Invalid type of character!');
     } else {
-      ({ attack: this.attack, defence: this.defense } = charStats[value]);
+      ({ 
+        attack: this.attack, 
+        defence: this.defense,
+        distance: this.distance,
+        range: this.range,
+        side: this.side, 
+      } = charStats[value]);
       this._type = value;
     }
   }

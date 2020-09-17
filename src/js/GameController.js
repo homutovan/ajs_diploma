@@ -1,21 +1,25 @@
 import themes from './themes';
 import PositionedCharacter from './PositionedCharacter';
-import { characterGenerator, generatePosition, typeList } from './generators';
+import { characterGenerator, generatePosition, generateTeam, typeList } from './generators';
+import { getPropagation } from './utils';
 
 export default class GameController {
-  constructor(gamePlay, stateService) {
+  constructor(gamePlay, stateService, side) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
     this.index = 0;
+    this.side = side
   }
 
   init() {
     this.gamePlay.drawUi('prairie');
-    this.position = generatePosition([...characterGenerator(typeList, 2),
-      ...characterGenerator(typeList, 3),
-      ...characterGenerator(typeList, 4),
-      ...characterGenerator(typeList, 4),
-    ]);
+    this.typeList = (this.side === 'good') ? typeList : typeList.reverse();
+    this.teamP = generateTeam(typeList.slice(0, typeList.length / 2), 4, 5);
+    this.teamE = generateTeam(typeList.slice(typeList.length / 2), 4, 5);
+    this.position = [
+      ...generatePosition(this.teamP, this.gamePlay.boardSize, 'good'),
+      ...generatePosition(this.teamE, this.gamePlay.boardSize, 'evil')
+    ];
     this.gamePlay.redrawPositions(this.position);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
@@ -24,21 +28,23 @@ export default class GameController {
 
   onCellClick(index) {
     const character = this.gamePlay.cells[index].querySelector('.character');
-    if (character) {
-      this.gamePlay.deselectCell(this.index);
-      this.gamePlay.selectCell(index);
-      this.index = index;
-    }
+    if (!character) return;
+    const pos = this.position.find((el) => el.position === index)
+    if (pos.character.side !== this.side) return;
+    this.gamePlay.deselectCell(this.index);
+    this.gamePlay.selectCell(index);
+    console.log(getPropagation(index, 2, this.gamePlay.boardSize));
+    // this.gamePlay.highlightCell(index, 2);
+    this.index = index;
   }
 
   onCellEnter(index) {
     this.gamePlay.cells[index].classList.add('entered');
     const character = this.gamePlay.cells[index].querySelector('.character');
-    if (character) {
-      const ch = this.position.find((el) => el.position === index);
-      const message = this.prepareMsg(ch.character);
-      this.gamePlay.showCellTooltip(message, index);
-    }
+    if (!character) return;
+    const pos = this.position.find((el) => el.position === index);
+    const message = this.prepareMsg(pos.character);
+    this.gamePlay.showCellTooltip(message, index);
   }
 
   onCellLeave(index) {

@@ -41,7 +41,7 @@ body {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  /* #grid-template-columns: repeat(8, 1fr); */
   grid-column-gap: 2px;
   grid-row-gap: 2px;
 }
@@ -52,6 +52,10 @@ body {
 
 .cell.entered {
   opacity: 0.8;
+}
+
+.cell.highlighted {
+  opacity: 0.5;
 }
 
 .cell.selected::before {

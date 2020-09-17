@@ -1,8 +1,9 @@
-import { calcHealthLevel, calcTileType } from './utils';
+import { calcHealthLevel, calcTileType, getBoard } from './utils';
 
 export default class GamePlay {
   constructor(boardSize) {
     this.boardSize = boardSize;
+    this.board = getBoard(boardSize)
     this.container = null;
     this.boardEl = null;
     this.cells = [];
@@ -49,11 +50,12 @@ export default class GamePlay {
     this.loadGameEl.addEventListener('click', (event) => this.onLoadGameClick(event));
 
     this.boardEl = this.container.querySelector('[data-id=board]');
+    this.boardEl.style['grid-template-columns'] = `repeat(${ this.boardSize }, 1fr)`
 
     this.boardEl.classList.add(theme);
     for (let i = 0; i < this.boardSize ** 2; i += 1) {
       const cellEl = document.createElement('div');
-      cellEl.classList.add('cell', 'map-tile', `map-tile-${calcTileType(i, this.boardSize)}`);
+      cellEl.classList.add('cell', 'map-tile', `map-tile-${calcTileType(i, this.board)}`);
       cellEl.addEventListener('mouseenter', (event) => this.onCellEnter(event));
       cellEl.addEventListener('mouseleave', (event) => this.onCellLeave(event));
       cellEl.addEventListener('click', (event) => this.onCellClick(event));
@@ -194,6 +196,10 @@ export default class GamePlay {
       .filter((o) => o.startsWith('selected')));
   }
 
+  highlightCell(index, radius) {
+    cells.forEach((i) => this.cells[i].classList.add('highlighted'))
+  }
+
   showCellTooltip(message, index) {
     this.cells[index].title = message;
   }
@@ -226,4 +232,5 @@ export default class GamePlay {
       throw new Error('GamePlay not bind to DOM');
     }
   }
+  
 }
