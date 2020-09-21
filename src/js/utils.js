@@ -13,11 +13,13 @@ export function getBoard(boardSize) {
 
 export function getPropagation(index, radius, boardSize) {
   const cells = [];
-  for (let i = 1; i <= radius; i += 1) {
-    for (let sign of [-1, 1]) {
-      cells.push(index + i * sign);
-      for (let offset of [-1, 0, 1]) {
-        cells.push(index + (boardSize + offset) * i * sign);
+  for (let offset = -radius; offset <= +radius; offset += 1) {
+    if (!offset) continue;
+    cells.push(index + boardSize * offset);
+    if (Math.floor((index + offset) / boardSize) === Math.floor(index / boardSize)) {
+      cells.push(index + offset);
+      for (const sign of [-1, 1]) {
+        cells.push(index + (boardSize + sign) * sign * offset);
       }
     }
   }
@@ -26,6 +28,6 @@ export function getPropagation(index, radius, boardSize) {
 
 export function calcHealthLevel(health) {
   if (health < 15) return 'critical';
-  else if (health < 50) return 'normal';
-  else return 'high';
+  if (health < 50) return 'normal';
+  return 'high';
 }

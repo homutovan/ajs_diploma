@@ -85,7 +85,6 @@ export default class GamePlay {
       healthIndicatorEl.classList.add('health-level-indicator', `health-level-indicator-${calcHealthLevel(position.character.health)}`);
       healthIndicatorEl.style.width = `${position.character.health}%`;
       healthEl.appendChild(healthIndicatorEl);
-
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
@@ -196,8 +195,12 @@ export default class GamePlay {
       .filter((o) => o.startsWith('selected')));
   }
 
-  highlightCell(index, radius) {
-    cells.forEach((i) => this.cells[i].classList.add('highlighted'))
+  highlightCell(cells) {
+    cells.forEach((i) => this.cells[i].classList.add('highlighted'));
+  }
+
+  dehighlightCell() {
+    this.cells.forEach((cell) => cell.classList.remove('highlighted'));
   }
 
   showCellTooltip(message, index) {

@@ -29,12 +29,14 @@ export default class GameController {
   onCellClick(index) {
     const character = this.gamePlay.cells[index].querySelector('.character');
     if (!character) return;
-    const pos = this.position.find((el) => el.position === index)
+    const pos = this.position.find((el) => el.position === index);
     if (pos.character.side !== this.side) return;
+    this.activeCharachter = pos;
     this.gamePlay.deselectCell(this.index);
     this.gamePlay.selectCell(index);
-    console.log(getPropagation(index, 2, this.gamePlay.boardSize));
-    // this.gamePlay.highlightCell(index, 2);
+    const cells = getPropagation(index, pos.character.distance, this.gamePlay.boardSize);
+    this.gamePlay.dehighlightCell();
+    this.gamePlay.highlightCell(cells);
     this.index = index;
   }
 
