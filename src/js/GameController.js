@@ -14,7 +14,7 @@ export default class GameController {
   init() {
     this.gamePlay.drawUi('prairie');
     this.typeList = (this.side === 'good') ? typeList : typeList.reverse();
-    this.teamP = generateTeam(typeList.slice(0, typeList.length / 2), 4, 5);
+    this.teamP = generateTeam(typeList.slice(0, typeList.length / 2), 4, 12);
     this.teamE = generateTeam(typeList.slice(typeList.length / 2), 4, 5);
     this.position = [
       ...generatePosition(this.teamP, this.gamePlay.boardSize, 'good'),
@@ -28,16 +28,22 @@ export default class GameController {
 
   onCellClick(index) {
     const character = this.gamePlay.cells[index].querySelector('.character');
-    if (!character) return;
-    const pos = this.position.find((el) => el.position === index);
-    if (pos.character.side !== this.side) return;
-    this.activeCharachter = pos;
-    this.gamePlay.deselectCell(this.index);
-    this.gamePlay.selectCell(index);
-    const cells = getPropagation(index, pos.character.distance, this.gamePlay.boardSize);
-    this.gamePlay.dehighlightCell();
-    this.gamePlay.highlightCell(cells);
-    this.index = index;
+    if (character) {
+      const pos = this.position.find((el) => el.position === index);
+      if (pos.character.side !== this.side) return;
+      this.activeCharachter = pos;
+      this.gamePlay.deselectCell(this.index);
+      this.gamePlay.selectCell(index);
+      const cells = getPropagation(index, pos.character.distance, this.gamePlay.boardSize);
+      this.gamePlay.dehighlightCell();
+      this.gamePlay.highlightCell(cells);
+      this.index = index;
+    } else {
+      this.activeCharachter.position = index;
+      this.gamePlay.redrawPositions(this.position);
+      this.gamePlay.deselectCell(this.index);
+      this.gamePlay.dehighlightCell();
+    }
   }
 
   onCellEnter(index) {

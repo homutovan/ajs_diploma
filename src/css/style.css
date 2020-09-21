@@ -54,8 +54,24 @@ body {
   opacity: 0.8;
 }
 
-.cell.highlighted {
+/* .cell.highlighted {
   opacity: 0.5;
+  outline: solid red 4px;
+  outline-offset: -30px;
+} */
+
+.cell.highlighted::before {
+  content: '';
+  display: block;
+  border-radius: 50%;
+  box-sizing: border-box;
+  width: 10%;
+  height: 10%;
+  top: 40%;
+  left: 40%;
+  opacity: 0.9;
+  position: absolute;
+  background-color: green;
 }
 
 .cell.selected::before {
