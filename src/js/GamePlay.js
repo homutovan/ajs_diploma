@@ -3,7 +3,7 @@ import { calcHealthLevel, calcTileType, getBoard } from './utils';
 export default class GamePlay {
   constructor(boardSize) {
     this.boardSize = boardSize;
-    this.board = getBoard(boardSize)
+    this.board = getBoard(boardSize);
     this.container = null;
     this.boardEl = null;
     this.cells = [];
@@ -44,13 +44,14 @@ export default class GamePlay {
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
+    // this.modal = document.querySelector('#modal-new-game');
 
     this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
     this.loadGameEl.addEventListener('click', (event) => this.onLoadGameClick(event));
 
     this.boardEl = this.container.querySelector('[data-id=board]');
-    this.boardEl.style['grid-template-columns'] = `repeat(${ this.boardSize }, 1fr)`
+    this.boardEl.style['grid-template-columns'] = `repeat(${this.boardSize}, 1fr)`;
 
     this.boardEl.classList.add(theme);
     for (let i = 0; i < this.boardSize ** 2; i += 1) {
@@ -82,7 +83,8 @@ export default class GamePlay {
       const healthEl = document.createElement('div');
       healthEl.classList.add('health-level');
       const healthIndicatorEl = document.createElement('div');
-      healthIndicatorEl.classList.add('health-level-indicator', `health-level-indicator-${calcHealthLevel(position.character.health)}`);
+      healthIndicatorEl.classList.add('health-level-indicator',
+        `health-level-indicator-${calcHealthLevel(position.character.health)}`);
       healthIndicatorEl.style.width = `${position.character.health}%`;
       healthEl.appendChild(healthIndicatorEl);
       charEl.appendChild(healthEl);
@@ -123,7 +125,7 @@ export default class GamePlay {
    * @param callback
    */
   addNewGameListener(callback) {
-    this.newGameListeners.push(callback);
+    this.newGameListeners.push();
   }
 
   /**
@@ -195,6 +197,14 @@ export default class GamePlay {
       .filter((o) => o.startsWith('selected')));
   }
 
+  enterCell(index) {
+    this.cells[index].classList.add('entered');
+  }
+
+  leaveCells(index) {
+    this.cells[index].classList.remove('entered');
+  }
+
   highlightCell(cells) {
     cells.forEach((i) => this.cells[i].classList.add('highlighted'));
   }
@@ -226,7 +236,12 @@ export default class GamePlay {
     });
   }
 
+  // setCursor(cursor) {
+  //   this.boardEl.style.cursor = cursor;
+  // }
+
   setCursor(cursor) {
+    // cells.forEach((index) => this.cells[index].style.cursor = cursor);
     this.boardEl.style.cursor = cursor;
   }
 
@@ -235,5 +250,10 @@ export default class GamePlay {
       throw new Error('GamePlay not bind to DOM');
     }
   }
-  
+
+  // showModal() {
+  //   console.log('asdfa');
+  //   this.modal.style.display = 'block';
+  //   console.log(this.modal);
+  // }
 }

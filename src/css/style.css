@@ -54,13 +54,16 @@ body {
   opacity: 0.8;
 }
 
-/* .cell.highlighted {
-  opacity: 0.5;
-  outline: solid red 4px;
-  outline-offset: -30px;
-} */
+.cell.highlighted {
+  opacity: 0.95;
+  outline: solid green 2px;
 
-.cell.highlighted::before {
+  /* outline-offset: calc(var(--cell-size) / -2); */
+  /* border-width: 5px; */
+  /* border-color: blue; */
+}
+
+/* .cell.highlighted::after {
   content: '';
   display: block;
   border-radius: 50%;
@@ -72,7 +75,7 @@ body {
   opacity: 0.9;
   position: absolute;
   background-color: green;
-}
+} */
 
 .cell.selected::before {
   content: '';
@@ -275,4 +278,8 @@ body {
     top: -20px;
     font-size: 1.5rem;
   }
+}
+
+.modal {
+  display: none;
 }

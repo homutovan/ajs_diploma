@@ -45,12 +45,23 @@ export const charStats = {
 
 export default class Character {
   constructor(level, type = 'generic') {
-    this.level = level;
-    this.health = 50;
     this.type = type;
+    this.health = 50;
+    this.level = level;
     if (new.target.name === 'Character') {
       throw new Error('Creating objects Character using new is illegal!');
     }
+  }
+
+  set level(value) {
+    this._level = 1;
+    for (let level = this._level; level < value; level += 1) {
+      this.levelUp();
+    }
+  }
+
+  get level() {
+    return this._level;
   }
 
   get type() {
@@ -61,25 +72,26 @@ export default class Character {
     if (charStats[value] === undefined) {
       throw new Error('Invalid type of character!');
     } else {
-      ({ 
-        attack: this.attack, 
+      ({
+        attack: this.attack,
         defence: this.defense,
         distance: this.distance,
         range: this.range,
-        side: this.side, 
+        side: this.side,
       } = charStats[value]);
       this._type = value;
     }
   }
 
   levelUp() {
-    this.level += 1;
+    this._level += 1;
     this.health = (this.health < 20) ? this.health + 80 : 100;
     this.attack = this.statUp(this.attack);
     this.defense = this.statUp(this.defense);
   }
 
   statUp(stat) { // Разобраться с формулой
-    return Math.max(stat, (stat * (1.8 - this.health)) / 100);
+    // return Math.max(stat, (stat * (1.8 - this.health)) / 100);
+    return stat;
   }
 }
