@@ -8,6 +8,7 @@ export default class GameController {
   constructor(gamePlay, stateService, side) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
+    this.activePosition = null;
     this.side = side;
     this.transitionСells = [];
     this.attackСells = [];
@@ -34,6 +35,7 @@ export default class GameController {
     if (position) {
       const { character } = position;
       if (character.side === this.side) {
+        this.deactivatePosition();
         this.activatePosition(position);
       } else if (this.attackСells.includes(index)) {
         this.attackPosition(position);
@@ -45,17 +47,14 @@ export default class GameController {
 
   activatePosition(position) {
     const { position: index } = position;
-    this.deactivatePosition(this.activePosition ? this.activePosition.position : 0);
     this.activePosition = position;
     this.gamePlay.selectCell(index);
     this.distributionCells(index);
-    this.gamePlay.dehighlightCell();
+    // this.gamePlay.dehighlightCell();
     this.gamePlay.highlightCell(this.transitionСells);
   }
 
   movePosition(index) {
-    this.deactivatePosition(this.activePosition.position);
-    this.deactivatePosition(index);
     this.activePosition.position = index;
     this.gamePlay.redrawPositions(this.position);
     this.gamePlay.dehighlightCell();
@@ -65,13 +64,16 @@ export default class GameController {
     position.character.health -= 10;
     this.gamePlay.showDamage(position.position, 10)
       .then(() => {
-        // this.deactivatePosition(this.activePosition);
         this.gamePlay.redrawPositions(this.position);
+        this.deactivatePosition(this.activePosition.position);
       });
   }
 
-  deactivatePosition(index) {
-    this.gamePlay.deselectCell(index);
+  deactivatePosition() {
+    if(this.activePosition) {
+      this.gamePlay.deselectCell(this.activePosition.position);
+      this.activePosition = null;
+    }
   }
 
   distributionCells(index) {
