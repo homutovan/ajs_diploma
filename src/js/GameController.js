@@ -23,57 +23,78 @@ export default class GameController {
       ...generatePosition(this.teamPlayer, this.gamePlay.boardSize, 'good'),
       ...generatePosition(this.teamEnemy, this.gamePlay.boardSize, 'evil'),
     ]);
-    this.gamePlay.redrawPositions(this.position);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
+    this.gamePlay.redrawPositions(this.position);
     // this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
   }
 
   onCellClick(index) {
-    const position = this.position.getPositionByIndex(index);
-    if (position) {
-      const { character } = position;
-      if (character.side === this.side) {
-        this.deactivatePosition();
-        this.activatePosition(position);
+    if (this.action) this.action(index) 
+  }
+
+  onCellEnter(index) {
+    if (this.activePosition) {
+      if (this.transitionСells.includes(index)) {
+        this.gamePlay.selectCell(index, 'green');
+        this.gamePlay.setCursor(cursors.pointer);
+        this.action = this.movePosition;
       } else if (this.attackСells.includes(index)) {
-        this.attackPosition(position);
+        this.gamePlay.selectCell(index, 'red');
+        this.gamePlay.setCursor(cursors.crosshair);
+        this.action = this.attackPosition;
+      } else if (this.playerCharacterCells.includes(index)) {
+        this.gamePlay.setCursor(cursors.pointer);
+        this.action = this.activatePosition;
+      } else {
+        this.gamePlay.setCursor(cursors.notallowed);
+        this.gamePlay.enterCell(index);
       }
-    } else if (this.activePosition && this.transitionСells.includes(index)) {
-      this.movePosition(index);
+    } else {
+      this.gamePlay.enterCell(index);
+      this.action = this.activatePosition;
+    }
+    const position = this.position.getPositionByIndex(index);
+
+    if (position) {
+      const message = position.getMessage();
+      this.gamePlay.showCellTooltip(message, index);
     }
   }
 
-  activatePosition(position) {
-    const { position: index } = position;
-    this.activePosition = position;
-    this.gamePlay.selectCell(index);
-    this.distributionCells(index);
-    // this.gamePlay.dehighlightCell();
-    this.gamePlay.highlightCell(this.transitionСells);
+  onCellLeave(index) {
+    this.gamePlay.leaveCells(index);
+    this.gamePlay.hideCellTooltip(index);
+    this.action = null;
+    if (this.activePosition && this.activePosition.position !== index) {
+      this.gamePlay.deselectCell(index);
+    }
   }
 
   movePosition(index) {
-    this.activePosition.position = index;
+    const position = this.activePosition
+    this.deactivatePosition();
+    position.position = index;
+    this.gamePlay.deselectCell(index)
     this.gamePlay.redrawPositions(this.position);
-    this.gamePlay.dehighlightCell();
   }
 
-  attackPosition(position) {
+  async attackPosition(index) {
+    const position = this.position.getPositionByIndex(index);
+    // this.gamePlay.showDamage(position.position, 10)
+    //   .then(() => {
+    //     this.gamePlay.deselectCell(index)
+    //     this.gamePlay.redrawPositions(this.position);
+    //     this.deactivatePosition();
+    //   });
+
+    await this.gamePlay.showDamage(position.position, 10);
     position.character.health -= 10;
-    this.gamePlay.showDamage(position.position, 10)
-      .then(() => {
-        this.gamePlay.redrawPositions(this.position);
-        this.deactivatePosition(this.activePosition.position);
-      });
-  }
-
-  deactivatePosition() {
-    if(this.activePosition) {
-      this.gamePlay.deselectCell(this.activePosition.position);
-      this.activePosition = null;
-    }
+    console.log(1)
+    this.gamePlay.deselectCell(index)
+    this.gamePlay.redrawPositions(this.position);
+    this.deactivatePosition();
   }
 
   distributionCells(index) {
@@ -87,36 +108,29 @@ export default class GameController {
       .filter((element) => this.enemyCharacterCells.includes(element));
   }
 
-  onCellEnter(index) {
-    if (this.activePosition) {
-      if (this.transitionСells.includes(index)) {
-        this.gamePlay.selectCell(index, 'green');
-        this.gamePlay.setCursor(cursors.pointer);
-      } else if (this.attackСells.includes(index)) {
-        this.gamePlay.selectCell(index, 'red');
-        this.gamePlay.setCursor(cursors.crosshair);
-      } else if (this.playerCharacterCells.includes(index)) {
-        this.gamePlay.setCursor(cursors.pointer);
-      } else {
-        this.gamePlay.setCursor(cursors.notallowed);
-        this.gamePlay.enterCell(index);
-      }
-    } else {
-      this.gamePlay.enterCell(index);
-    }
-    const position = this.position.getPositionByIndex(index);
-
+  activatePosition(index) {
+    this.deactivatePosition();
+    const position = this.position.getPositionByIndex(index)
     if (position) {
-      const message = position.getMessage();
-      this.gamePlay.showCellTooltip(message, index);
+      if (position.character.side === this.side) {
+        this.activePosition = position;
+        this.gamePlay.selectCell(index);
+        this.distributionCells(index);
+        this.gamePlay.highlightCell(this.transitionСells);
+      }
     }
   }
 
-  onCellLeave(index) {
-    this.gamePlay.leaveCells(index);
-    this.gamePlay.hideCellTooltip(index);
-    if (this.activePosition && this.activePosition.position !== index) {
-      this.gamePlay.deselectCell(index);
+  deactivatePosition() {
+    if(this.activePosition) {
+      this.gamePlay.deselectCell(this.activePosition.position);
+      this.gamePlay.dehighlightCell();
+      this.gamePlay.setCursor(cursors.auto);
+      this.action = this.activatePosition;
+      this.activePosition = null;
+      this.playerCharacterCells = [];
+      this.enemyCharacterCells = [];
+      this.transitionСells = [];
     }
   }
 }
