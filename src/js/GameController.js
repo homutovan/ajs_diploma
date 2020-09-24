@@ -1,6 +1,7 @@
 import themes from './themes';
 import cursors from './cursors';
 import Position from './Position';
+import GameState from './GameState';
 import { generatePosition, generateTeam, typeList } from './generators';
 import { getPropagation } from './utils';
 
@@ -8,6 +9,7 @@ export default class GameController {
   constructor(gamePlay, stateService, side) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
+    this.gameState = new GameState(this, stateService);
     this.activePosition = null;
     this.side = side;
     this.transitionСells = [];
@@ -26,12 +28,18 @@ export default class GameController {
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    this.gamePlay.redrawPositions(this.position);
     // this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
+    if (this.stateService.loadStatus) {
+      this.gameState.objToPosition(this.position);
+    }
+    this.gamePlay.redrawPositions(this.position);
   }
 
   onCellClick(index) {
-    if (this.action) this.action(index) 
+    if (this.action.name !== 'activatePosition') {
+      this.gameState.traceTurn(index);
+    }
+    this.action(index);
   }
 
   onCellEnter(index) {
@@ -50,6 +58,7 @@ export default class GameController {
       } else {
         this.gamePlay.setCursor(cursors.notallowed);
         this.gamePlay.enterCell(index);
+        this.action = () => this.gamePlay.showError('Недоступное действие!');
       }
     } else {
       this.gamePlay.enterCell(index);
@@ -73,26 +82,18 @@ export default class GameController {
   }
 
   movePosition(index) {
-    const position = this.activePosition
+    const position = this.activePosition;
     this.deactivatePosition();
     position.position = index;
-    this.gamePlay.deselectCell(index)
+    this.gamePlay.deselectCell(index);
     this.gamePlay.redrawPositions(this.position);
   }
 
   async attackPosition(index) {
     const position = this.position.getPositionByIndex(index);
-    // this.gamePlay.showDamage(position.position, 10)
-    //   .then(() => {
-    //     this.gamePlay.deselectCell(index)
-    //     this.gamePlay.redrawPositions(this.position);
-    //     this.deactivatePosition();
-    //   });
-
     await this.gamePlay.showDamage(position.position, 10);
     position.character.health -= 10;
-    console.log(1)
-    this.gamePlay.deselectCell(index)
+    this.gamePlay.deselectCell(index);
     this.gamePlay.redrawPositions(this.position);
     this.deactivatePosition();
   }
@@ -110,7 +111,7 @@ export default class GameController {
 
   activatePosition(index) {
     this.deactivatePosition();
-    const position = this.position.getPositionByIndex(index)
+    const position = this.position.getPositionByIndex(index);
     if (position) {
       if (position.character.side === this.side) {
         this.activePosition = position;
@@ -122,7 +123,7 @@ export default class GameController {
   }
 
   deactivatePosition() {
-    if(this.activePosition) {
+    if (this.activePosition) {
       this.gamePlay.deselectCell(this.activePosition.position);
       this.gamePlay.dehighlightCell();
       this.gamePlay.setCursor(cursors.auto);
