@@ -8,10 +8,8 @@ export default class GameController {
   constructor(gamePlay, stateService, side) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
-    this.activePosition = null;
     this.side = side;
-    this.transitionСells = [];
-    this.attackСells = [];
+    this.selected = [];
   }
 
   init() {
@@ -30,11 +28,21 @@ export default class GameController {
     // this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
   }
 
-  onCellClick(index) {
-    if (this.action) this.action(index) 
+  async onCellClick(index) {
+    // console.log(this.gamePlay.cellClickListeners)
+    this.action(index);
+      //.then(() => this.gamePlay.redrawPositions(this.position));
   }
 
   onCellEnter(index) {
+    const position = this.position.getPositionByIndex(index);
+    
+    if (position) {
+      const message = position.getMessage();
+      this.gamePlay.showCellTooltip(message, index);
+    }
+    // this.selected.push(index);
+
     if (this.activePosition) {
       if (this.transitionСells.includes(index)) {
         this.gamePlay.selectCell(index, 'green');
@@ -50,16 +58,11 @@ export default class GameController {
       } else {
         this.gamePlay.setCursor(cursors.notallowed);
         this.gamePlay.enterCell(index);
+        this.action = this.gamePlay.showError;
       }
     } else {
       this.gamePlay.enterCell(index);
       this.action = this.activatePosition;
-    }
-    const position = this.position.getPositionByIndex(index);
-
-    if (position) {
-      const message = position.getMessage();
-      this.gamePlay.showCellTooltip(message, index);
     }
   }
 
@@ -77,35 +80,18 @@ export default class GameController {
     this.deactivatePosition();
     position.position = index;
     this.gamePlay.deselectCell(index)
-    this.gamePlay.redrawPositions(this.position);
+    // this.gamePlay.redrawPositions(this.position);
   }
 
-  async attackPosition(index) {
+  attackPosition(index) {
     const position = this.position.getPositionByIndex(index);
-    // this.gamePlay.showDamage(position.position, 10)
-    //   .then(() => {
-    //     this.gamePlay.deselectCell(index)
-    //     this.gamePlay.redrawPositions(this.position);
-    //     this.deactivatePosition();
-    //   });
-
-    await this.gamePlay.showDamage(position.position, 10);
+    
     position.character.health -= 10;
-    console.log(1)
-    this.gamePlay.deselectCell(index)
-    this.gamePlay.redrawPositions(this.position);
     this.deactivatePosition();
-  }
-
-  distributionCells(index) {
-    const { distance, range } = this.activePosition.character;
-    const characterCells = this.position.getAllIndex();
-    this.playerCharacterCells = this.position.getTeamPosition(this.side);
-    this.enemyCharacterCells = this.position.getTeamPosition(this.side === 'good' ? 'evil' : 'good');
-    this.transitionСells = getPropagation(index, distance, this.gamePlay.boardSize)
-      .filter((element) => !characterCells.includes(element));
-    this.attackСells = getPropagation(index, range, this.gamePlay.boardSize)
-      .filter((element) => this.enemyCharacterCells.includes(element));
+    this.gamePlay.deselectCell(index);
+    // this.selected.forEach((index) => this.gamePlay.deselectCell(index))
+    // this.gamePlay.redrawPositions(this.position);
+    return this.gamePlay.showDamage(position.position, 10);
   }
 
   activatePosition(index) {
@@ -132,5 +118,16 @@ export default class GameController {
       this.enemyCharacterCells = [];
       this.transitionСells = [];
     }
+  }
+
+  distributionCells(index) {
+    const { distance, range } = this.activePosition.character;
+    const characterCells = this.position.getAllIndex();
+    this.playerCharacterCells = this.position.getTeamPosition(this.side);
+    this.enemyCharacterCells = this.position.getTeamPosition(this.side === 'good' ? 'evil' : 'good');
+    this.transitionСells = getPropagation(index, distance, this.gamePlay.boardSize)
+      .filter((element) => !characterCells.includes(element));
+    this.attackСells = getPropagation(index, range, this.gamePlay.boardSize)
+      .filter((element) => this.enemyCharacterCells.includes(element));
   }
 }
