@@ -25,7 +25,7 @@ export default class GameState {
       from: this.game.activePosition.position,
       to: index,
     });
-    await setTimeout(this.saveTurn.bind(this), 600);
+    await setTimeout(this.saveTurn.bind(this), 550);
   }
 
   saveTurn() {

@@ -2,18 +2,21 @@ import themes from './themes';
 import cursors from './cursors';
 import Position from './Position';
 import GameState from './GameState';
+import Estimator from './Estimator';
 import { generatePosition, generateTeam, typeList } from './generators';
 import { getPropagation } from './utils';
 
 export default class GameController {
   constructor(gamePlay, stateService, side) {
     this.gamePlay = gamePlay;
+    this.estimator = new Estimator(this);
     this.stateService = stateService;
     this.gameState = new GameState(this, stateService);
     this.activePosition = null;
     this.side = side;
     this.transitionСells = [];
     this.attackСells = [];
+    this.turn = 0;
   }
 
   init() {
@@ -35,10 +38,31 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.position);
   }
 
+  set turn(value) {
+    this._turn = value;
+    if (this._turn % 2) this.enemy();
+  }
+
+  get turn() {
+    return this._turn;
+  }
+
+  async enemy() {
+    const { position, action, target } = this.estimator.requestStrategy();
+    this.side = 'good';
+    // this.activatePosition(position);
+    // // this.action = action;
+    // // this.onCellClick(target);
+    console.log('enemy');
+    this.side = 'evil';
+  }
+
   onCellClick(index) {
     if (this.action.name !== 'activatePosition') {
       this.gameState.traceTurn(index);
+      this.turn += 1;
     }
+    console.log(index);
     this.action(index);
   }
 
