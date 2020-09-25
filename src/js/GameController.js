@@ -1,15 +1,24 @@
 import themes from './themes';
 import cursors from './cursors';
 import Position from './Position';
+import GameState from './GameState';
+import Estimator from './Estimator';
 import { generatePosition, generateTeam, typeList } from './generators';
 import { getPropagation } from './utils';
 
 export default class GameController {
   constructor(gamePlay, stateService, side) {
     this.gamePlay = gamePlay;
+    this.estimator = new Estimator(this);
     this.stateService = stateService;
     this.side = side;
     this.selected = [];
+    this.gameState = new GameState(this, stateService);
+    this.activePosition = null;
+    this.side = side;
+    this.transitionСells = [];
+    this.attackСells = [];
+    this.turn = 0;
   }
 
   init() {
@@ -24,14 +33,39 @@ export default class GameController {
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    this.gamePlay.redrawPositions(this.position);
     // this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
+    if (this.stateService.loadStatus) {
+      this.gameState.objToPosition(this.position);
+    }
+    this.gamePlay.redrawPositions(this.position);
+  }
+
+  set turn(value) {
+    this._turn = value;
+    if (this._turn % 2) this.enemy();
+  }
+
+  get turn() {
+    return this._turn;
+  }
+
+  async enemy() {
+    const { position, action, target } = this.estimator.requestStrategy();
+    this.side = 'good';
+    // this.activatePosition(position);
+    // // this.action = action;
+    // // this.onCellClick(target);
+    console.log('enemy');
+    this.side = 'evil';
   }
 
   async onCellClick(index) {
-    // console.log(this.gamePlay.cellClickListeners)
-    this.action(index);
-      //.then(() => this.gamePlay.redrawPositions(this.position));
+    if (this.action.name !== 'activatePosition') {
+      this.gameState.traceTurn(index);
+      this.turn += 1;
+    }
+    console.log(index);
+    await this.action(index);
   }
 
   onCellEnter(index) {
@@ -58,7 +92,7 @@ export default class GameController {
       } else {
         this.gamePlay.setCursor(cursors.notallowed);
         this.gamePlay.enterCell(index);
-        this.action = this.gamePlay.showError;
+        this.action = () => this.gamePlay.showError('Недоступное действие!');
       }
     } else {
       this.gamePlay.enterCell(index);
@@ -76,17 +110,19 @@ export default class GameController {
   }
 
   movePosition(index) {
-    const position = this.activePosition
+    const position = this.activePosition;
     this.deactivatePosition();
     position.position = index;
-    this.gamePlay.deselectCell(index)
-    // this.gamePlay.redrawPositions(this.position);
+    this.gamePlay.deselectCell(index);
+    this.gamePlay.redrawPositions(this.position);
   }
 
   attackPosition(index) {
     const position = this.position.getPositionByIndex(index);
-    
+    await this.gamePlay.showDamage(position.position, 10);
     position.character.health -= 10;
+    this.gamePlay.deselectCell(index);
+    this.gamePlay.redrawPositions(this.position);
     this.deactivatePosition();
     this.gamePlay.deselectCell(index);
     // this.selected.forEach((index) => this.gamePlay.deselectCell(index))
@@ -96,7 +132,7 @@ export default class GameController {
 
   activatePosition(index) {
     this.deactivatePosition();
-    const position = this.position.getPositionByIndex(index)
+    const position = this.position.getPositionByIndex(index);
     if (position) {
       if (position.character.side === this.side) {
         this.activePosition = position;
@@ -108,7 +144,7 @@ export default class GameController {
   }
 
   deactivatePosition() {
-    if(this.activePosition) {
+    if (this.activePosition) {
       this.gamePlay.deselectCell(this.activePosition.position);
       this.gamePlay.dehighlightCell();
       this.gamePlay.setCursor(cursors.auto);

@@ -236,12 +236,7 @@ export default class GamePlay {
     });
   }
 
-  // setCursor(cursor) {
-  //   this.boardEl.style.cursor = cursor;
-  // }
-
   setCursor(cursor) {
-    // cells.forEach((index) => this.cells[index].style.cursor = cursor);
     this.boardEl.style.cursor = cursor;
   }
 
