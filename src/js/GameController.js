@@ -8,10 +8,10 @@ import { getPropagation } from './utils';
 
 export default class GameController {
   constructor(gamePlay, stateService, side) {
+    this.side = side;
     this.gamePlay = gamePlay;
     this.estimator = new Estimator(this);
     this.stateService = stateService;
-    this.side = side;
     this.selected = [];
     this.gameState = new GameState(this, stateService);
     this.activePosition = null;
@@ -23,19 +23,24 @@ export default class GameController {
 
   init() {
     this.gamePlay.drawUi('prairie');
-    this.typeList = (this.side === 'good') ? typeList : typeList.reverse();
-    this.teamPlayer = generateTeam(typeList.slice(0, typeList.length / 2), 4, 12);
-    this.teamEnemy = generateTeam(typeList.slice(typeList.length / 2), 4, 5);
+    this.teamSize = 5;
+    this.maxCharacterLevel = 4;
+
+    this.evilTeam = generateTeam(typeList.slice(0, typeList.length / 2), this.maxCharacterLevel, this.teamSize);
+    this.goodTeam = generateTeam(typeList.slice(typeList.length / 2), this.maxCharacterLevel, this.teamSize);
+
     this.position = new Position([
-      ...generatePosition(this.teamPlayer, this.gamePlay.boardSize, 'good'),
-      ...generatePosition(this.teamEnemy, this.gamePlay.boardSize, 'evil'),
+      ...generatePosition(this.goodTeam, this.gamePlay.boardSize, this.side),
+      ...generatePosition(this.evilTeam, this.gamePlay.boardSize, this.estimator.side),
     ]);
+
+    this.onCellClick = this.gameState.traceTurn(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
     // this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
     if (this.stateService.loadStatus) {
-      this.gameState.objToPosition(this.position);
+      this.gameState.recoverTurn();
     }
     this.gamePlay.redrawPositions(this.position);
   }
@@ -50,21 +55,11 @@ export default class GameController {
   }
 
   async enemy() {
-    const { position, action, target } = this.estimator.requestStrategy();
-    this.side = 'good';
-    // this.activatePosition(position);
-    // // this.action = action;
-    // // this.onCellClick(target);
-    console.log('enemy');
-    this.side = 'evil';
+    this.estimator.requestStrategy();
   }
 
-  async onCellClick(index) {
-    if (this.action.name !== 'activatePosition') {
-      this.gameState.traceTurn(index);
-      this.turn += 1;
-    }
-    console.log(index);
+  async click(index) {
+    console.log(`this.turn: ${this.turn}`)
     await this.action(index);
   }
 
@@ -75,7 +70,6 @@ export default class GameController {
       const message = position.getMessage();
       this.gamePlay.showCellTooltip(message, index);
     }
-    // this.selected.push(index);
 
     if (this.activePosition) {
       if (this.transitionСells.includes(index)) {
@@ -117,17 +111,13 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.position);
   }
 
-  attackPosition(index) {
+  async attackPosition(index) {
     const position = this.position.getPositionByIndex(index);
-    await this.gamePlay.showDamage(position.position, 10);
-    position.character.health -= 10;
-    this.gamePlay.deselectCell(index);
-    this.gamePlay.redrawPositions(this.position);
     this.deactivatePosition();
     this.gamePlay.deselectCell(index);
-    // this.selected.forEach((index) => this.gamePlay.deselectCell(index))
-    // this.gamePlay.redrawPositions(this.position);
-    return this.gamePlay.showDamage(position.position, 10);
+    await this.gamePlay.showDamage(position.position, 10);
+    position.character.health -= 10;
+    this.gamePlay.redrawPositions(this.position);
   }
 
   activatePosition(index) {
@@ -160,7 +150,7 @@ export default class GameController {
     const { distance, range } = this.activePosition.character;
     const characterCells = this.position.getAllIndex();
     this.playerCharacterCells = this.position.getTeamPosition(this.side);
-    this.enemyCharacterCells = this.position.getTeamPosition(this.side === 'good' ? 'evil' : 'good');
+    this.enemyCharacterCells = this.position.getTeamPosition(this.estimator.side);
     this.transitionСells = getPropagation(index, distance, this.gamePlay.boardSize)
       .filter((element) => !characterCells.includes(element));
     this.attackСells = getPropagation(index, range, this.gamePlay.boardSize)

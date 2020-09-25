@@ -29,7 +29,7 @@ export function generateTeam(allowedTypes, maxLevel, characterCount) {
 }
 
 export function generatePosition(characterList, boardSize, side) {
-  const restrictor = (_, i) => side === 'good' ? i * boardSize : i * boardSize + boardSize - 2;
+  const restrictor = (_, i) => side === 'evil' ? i * boardSize : i * boardSize + boardSize - 2;
   const vertLine = Array(boardSize).fill('').map(restrictor);
   const availablePosition = [...vertLine, ...vertLine.map((el) => el + 1)];
   const position = [];

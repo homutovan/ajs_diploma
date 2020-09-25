@@ -32,6 +32,22 @@ body {
   margin: 50px 0;
 }
 
+.operation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info {
+  font-weight: 400;
+  color: red;
+  text-align: center;
+  vertical-align: middle;
+  padding: .375rem .75rem;
+  font-size: 2rem;
+  line-height: 1.5;
+}
+
 .board-container {
   display: flex;
   align-items: center;
@@ -41,7 +57,6 @@ body {
 
 .board {
   display: grid;
-  /* #grid-template-columns: repeat(8, 1fr); */
   grid-column-gap: 2px;
   grid-row-gap: 2px;
 }

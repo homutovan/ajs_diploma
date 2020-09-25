@@ -13,19 +13,31 @@ export default class GameState {
       this.state = this.driver.load();
     } catch (e) {
       console.log(e);
-      this.state = { currentTurn: -1, history: [] };
+      this.state = { currentTurn: - 1, history: [] };
     }
   }
 
-  async traceTurn(index) {
-    this.state.currentTurn += 1;
-    this.state.history.push({
-      turn: this.state.currentTurn,
-      action: this.game.action.name,
-      from: this.game.activePosition.position,
-      to: index,
-    });
-    await setTimeout(this.saveTurn.bind(this), 550);
+  traceTurn(trackedFunction) {
+    return async (arg) => {
+      if (this.game.action.name && this.game.action.name !== 'activatePosition') {
+        this.state.currentTurn += 1;
+        this.game.turn = this.state.currentTurn
+        this.state.history.push({
+          turn: this.game.turn,
+          side: this.game.side,
+          action: this.game.action.name,
+          from: this.game.activePosition.position,
+          to: arg,
+        });
+        await trackedFunction.call(this.game, arg);
+        this.saveTurn();
+      } else trackedFunction.call(this.game, arg);
+    }
+  }
+
+  recoverTurn() {
+    this.objToPosition(this.game.position)
+    this.game.turn = this.state.currentTurn;
   }
 
   saveTurn() {

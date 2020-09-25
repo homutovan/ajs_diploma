@@ -31,10 +31,15 @@ export default class GamePlay {
     this.checkBinding();
 
     this.container.innerHTML = `
-      <div class="controls">
-        <button data-id="action-restart" class="btn">New Game</button>
-        <button data-id="action-save" class="btn">Save Game</button>
-        <button data-id="action-load" class="btn">Load Game</button>
+      <div class="operation">
+        <div class="info">evil</div>
+        <div class="controls">
+          <button data-id="action-restart" class="btn">New Game</button>
+          <button data-id="action-save" class="btn">Save Game</button>
+          <button data-id="action-load" class="btn">Load Game</button>
+          <button data-id="action-load" class="btn">Demo Game</button>
+        </div>
+        <div class="info">good</div>
       </div>
       <div class="board-container">
         <div data-id="board" class="board"></div>
