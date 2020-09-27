@@ -1,5 +1,6 @@
 import Character, { charStats } from './Character';
 import PositionedCharacter from './PositionedCharacter';
+import { getRandomElement } from './utils';
 
 export const typeList = Object.keys(charStats).map((type) => class extends Character {
   constructor(level) {
@@ -15,9 +16,8 @@ export const typeList = Object.keys(charStats).map((type) => class extends Chara
  * @returns Character type children (ex. Magician, Bowman, etc)
  */
 export function* characterGenerator(allowedTypes, maxLevel) {
-  const type = Math.floor(Math.random() * allowedTypes.length);
   const level = Math.floor(Math.random() * maxLevel) + 1;
-  yield new allowedTypes[type](level);
+  yield new (getRandomElement(allowedTypes))(level);
 }
 
 export function generateTeam(allowedTypes, maxLevel, characterCount) {

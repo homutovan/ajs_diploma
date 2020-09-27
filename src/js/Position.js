@@ -1,12 +1,12 @@
 export default class Position {
-  constructor(positionList, redrawMethod) {
+  constructor(positionList) {
     this.positionList = positionList;
   }
 
   [Symbol.iterator]() {
     let current = 0;
     this.positionList = this.positionList
-     .filter((element) => element.character.health > 0);
+      .filter((element) => element.character.health > 0);
     const last = this.positionList.length;
     const list = this.positionList;
 
@@ -40,4 +40,6 @@ export default class Position {
   getPositionByIndex(index) {
     return this.positionList.find((el) => el.position === index);
   }
+
+  
 }

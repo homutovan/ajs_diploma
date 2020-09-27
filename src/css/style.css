@@ -272,6 +272,22 @@ body {
   background: #f00;
 }
 
+.bullet {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  z-index: 999;
+}
+
+.bullet.red {
+  background-color: red;
+}
+
+.bullet.blue {
+  background-color: blue;
+}
+
 .damage {
   position: absolute;
   width: var(--cell-size);

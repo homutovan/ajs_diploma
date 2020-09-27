@@ -64,6 +64,14 @@ export default class Character {
     return this._level;
   }
 
+  set health(value) {
+    this._helath = Math.min(100, value);
+  }
+
+  get health() {
+    return this._helath;
+  }
+
   get type() {
     return this._type;
   }
@@ -85,13 +93,18 @@ export default class Character {
 
   levelUp() {
     this._level += 1;
-    this.health = (this.health < 20) ? this.health + 80 : 100;
+    this.health += 80;
     this.attack = this.statUp(this.attack);
     this.defense = this.statUp(this.defense);
   }
 
-  statUp(stat) { // Разобраться с формулой
-    // return Math.max(stat, (stat * (1.8 - this.health)) / 100);
-    return stat;
+  statUp(stat) {
+    return Math.floor(Math.max(stat, (stat * (80 + this.health)) / 100));
+  }
+
+  getDamage(attack) {
+    const damage = Math.floor(Math.max(attack - this.defense, attack * 0.1));
+    this.health -= damage;
+    return damage;
   }
 }

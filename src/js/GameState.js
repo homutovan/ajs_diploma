@@ -13,15 +13,14 @@ export default class GameState {
       this.state = this.driver.load();
     } catch (e) {
       console.log(e);
-      this.state = { currentTurn: - 1, history: [] };
+      this.state = { history: [] };
     }
   }
 
   traceTurn(trackedFunction) {
     return async (arg) => {
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
-        this.state.currentTurn += 1;
-        this.game.turn = this.state.currentTurn
+        this.state.currentTurn = this.game.turn;
         this.state.history.push({
           turn: this.game.turn,
           side: this.game.side,
@@ -31,12 +30,13 @@ export default class GameState {
         });
         await trackedFunction.call(this.game, arg);
         this.saveTurn();
+        this.game.turn += 1;
       } else trackedFunction.call(this.game, arg);
-    }
+    };
   }
 
   recoverTurn() {
-    this.objToPosition(this.game.position)
+    this.objToPosition(this.game.position);
     this.game.turn = this.state.currentTurn;
   }
 
@@ -44,7 +44,10 @@ export default class GameState {
     this.state.board = [...this.game.position]
       .map((position) => this.positionToObj(position));
     this.driver.save(this.state);
-    console.log(this.state);
+  }
+
+  getLastTurn() {
+    return this.state.history[this.state.history.length - 1];
   }
 
   positionToObj(position) {

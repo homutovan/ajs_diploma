@@ -31,7 +31,7 @@ export default class GamePlay {
     this.checkBinding();
 
     this.container.innerHTML = `
-      <div class="operation">
+      <div class="operation" id="player">
         <div class="info">evil</div>
         <div class="controls">
           <button data-id="action-restart" class="btn">New Game</button>
@@ -42,7 +42,7 @@ export default class GamePlay {
         <div class="info">good</div>
       </div>
       <div class="board-container">
-        <div data-id="board" class="board"></div>
+        <div data-id="board" class="board"id="enemy"></div>
       </div>
     `;
 
@@ -50,6 +50,8 @@ export default class GamePlay {
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
     // this.modal = document.querySelector('#modal-new-game');
+    this.playerNameEl = this.container.querySelector('#player');
+    this.enemyNameEl = this.container.querySelector('#enemy');
 
     this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
@@ -239,6 +241,44 @@ export default class GamePlay {
         resolve();
       });
     });
+  }
+
+  showDistanceAttack(from, to, color) {
+    // console.log('showDistanceAttack');
+    // console.log(color);
+    return new Promise((resolve) => {
+      const cellFrom = this.cells[from];
+      const cellTo = this.cells[to];
+      const bulletEl = document.createElement('span');
+      // damageEl.textContent = damage;
+      bulletEl.classList.add('bullet', color);
+      cellFrom.appendChild(bulletEl);
+      const {
+        x: startX, y: startY, width: startW, height: startH,
+      } = cellFrom.getBoundingClientRect();
+      const {
+        x: stopX, y: stopY, // width: stopW, height: stopH,
+      } = cellTo.getBoundingClientRect();
+      const deltaX = (stopX - startX) / 50;
+      const deltaY = (stopY - startY) / 50;
+      this.moveElement(bulletEl, startH / 2, startW / 2, deltaX, deltaY, stopX - startX, stopY - startY);
+      // cellFrom.removeChild(bulletEl);
+      // resolve();
+    });
+  }
+
+  moveElement(element, posX, posY, deltaX, deltaY, stopX, stopY) {
+    // console.log('move');
+    // console.log(posX, posY, stopX);
+    // console.log(Math.abs(stopX - posX), deltaX);
+    if (Math.abs(stopX - posX) > Math.abs(deltaX) && Math.abs(stopY - posY) > Math.abs(deltaY)) {
+      element.style.top = `${posY}px`;
+      element.style.left = `${posX}px`;
+      setTimeout(
+        () => this.moveElement(element, posX + deltaX, posY + deltaY, deltaX, deltaY, stopX, stopY),
+        1,
+      );
+    }
   }
 
   setCursor(cursor) {

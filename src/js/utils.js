@@ -3,6 +3,18 @@ export function calcTileType(index, board) {
   return board[(index - (index % len)) / len][index % len];
 }
 
+export function distanceMetric(pointA, pointB, boardSize) {
+  const pointAX = pointA % boardSize;
+  const pointBX = pointB % boardSize;
+  const pointAY = (pointA - (pointA % boardSize)) / boardSize;
+  const pointBY = (pointB - (pointB % boardSize)) / boardSize;
+  let distance = ((pointAX - pointBX) ** 2 + (pointAY - pointBY) ** 2) ** 0.5;
+  if (!Number.isInteger(distance)) {
+    distance /= Math.SQRT2;
+  }
+  return +distance.toFixed(1);
+}
+
 export function getBoard(boardSize) {
   return [
     ['top-left', ...Array(boardSize - 2).fill('top'), 'top-right'],
@@ -12,18 +24,15 @@ export function getBoard(boardSize) {
 }
 
 export function getPropagation(index, radius, boardSize) {
-  const cells = [];
-  for (let offset = -radius; offset <= +radius; offset += 1) {
-    if (!offset) continue;
-    cells.push(index + boardSize * offset);
-    if (Math.floor((index + offset) / boardSize) === Math.floor(index / boardSize)) {
-      cells.push(index + offset);
-      for (const sign of [-1, 1]) {
-        cells.push(index + (boardSize + sign) * sign * offset);
-      }
-    }
-  }
-  return cells.filter((el) => el >= 0 && el <= boardSize ** 2 - 1);
+  const metric = (element) => distanceMetric(element, index, boardSize);
+  return Array(boardSize ** 2).fill('').map((_, i) => i)
+    .filter((element) => (element !== index)
+      && metric(element) <= radius
+      && Number.isInteger(metric(element)));
+}
+
+export function getRandomElement(list) {
+  return list[Math.floor(Math.random() * list.length)];
 }
 
 export function calcHealthLevel(health) {
