@@ -44,7 +44,7 @@ export const charStats = {
 };
 
 export default class Character {
-  constructor(level, type = 'generic') {
+  constructor(level, type) {
     this.type = type;
     this.health = 50;
     this.level = level;
@@ -53,7 +53,7 @@ export default class Character {
     }
   }
 
-  set level(value) {
+  set level(value) { /// подумать
     this._level = 1;
     for (let level = this._level; level < value; level += 1) {
       this.levelUp();
