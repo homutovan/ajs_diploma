@@ -61,6 +61,7 @@ export default class GameController {
     this.playerCharacterCells = this.position.getTeamPosition(this.side);
     this.enemyCharacterCells = this.position.getTeamPosition(this.enemySide);
     this.gamePlay.redrawPositions(this.position);
+    this.gamePlay.updateStatistics(this.gameState.getStatistics());
     if (this.side === this.estimator.side || this.demo) this.enemyAction();
   }
 
@@ -69,9 +70,9 @@ export default class GameController {
   }
 
   enemyAction() {
-    setTimeout(() => {
-      this.estimator.requestStrategy();
-    }, 50);
+    // setTimeout(() => {
+    //   this.estimator.requestStrategy();
+    // }, 50);
   }
 
   async click(index) {
@@ -117,18 +118,18 @@ export default class GameController {
     }
   }
 
-  movePosition(index) {
+  async movePosition(index) {
     const position = this.activePosition;
+    await this.gamePlay.animateAction(position.position, index, 'move');
+    console.log('dfsf');
     this.deactivatePosition();
-    // console.log(index);
     position.position = index;
     this.gamePlay.deselectCell(index);
   }
 
   async attackPosition(index) {
     const position = this.position.getPositionByIndex(index);
-    const color = this.side === 'evil' ? 'red' : 'blue';
-    this.gamePlay.showDistanceAttack(this.activePosition.position, index, color);
+    this.gamePlay.animateAction(this.activePosition.position, index, 'attack', this.side);
     const damage = position.character.getDamage(this.activePosition.character.attack);
     this.deactivatePosition();
     this.gamePlay.deselectCell(index);

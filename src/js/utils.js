@@ -40,3 +40,8 @@ export function calcHealthLevel(health) {
   if (health < 50) return 'normal';
   return 'high';
 }
+
+export function getTotalPropBySide(list, side, prop) {
+  return list.filter((element) => element.character.side === side)
+    .reduce((acc, element) => acc + element.character[prop], 0);
+}

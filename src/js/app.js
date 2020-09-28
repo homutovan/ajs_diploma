@@ -5,7 +5,7 @@ import GamePlay from './GamePlay';
 import GameController from './GameController';
 import GameStateService from './GameStateService';
 
-const gamePlay = new GamePlay(12);
+const gamePlay = new GamePlay(12, 'evil');
 gamePlay.bindToDOM(document.querySelector('#game-container'));
 
 const stateService = new GameStateService(localStorage);

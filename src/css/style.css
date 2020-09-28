@@ -50,15 +50,57 @@ body {
 
 .board-container {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
+  /* align-content: stretch; */
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.turn-counter {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-align: center;
+  color: white;
 }
 
 .board {
   display: grid;
   grid-column-gap: 2px;
   grid-row-gap: 2px;
+}
+
+.sidebar {
+  /* background-image: url('../img/prairie/map-tile-center.png'); */
+  border-image: url('../img/prairie/map-tile-center.png');
+  border-image-width: 5px;
+  /* border: solid black 1px; */
+  border-width: 10px;
+  /* border-style: solid; */
+  margin: 0 5%;
+  padding: 20px;
+  /* width: 200px; */
+  border-radius: 2rem;
+}
+
+.title {
+  margin-bottom: 30px;
+  font-size: 3rem;
+  text-transform: capitalize;
+  color: white;
+  text-align: center;
+}
+
+.side-title {
+  margin-bottom: 30px;
+}
+
+.stat-title {
+  font-size: 2rem;
+}
+
+.stats {
+  font-size: 2rem;
+  color: red;
 }
 
 .cell {
@@ -72,25 +114,7 @@ body {
 .cell.highlighted {
   opacity: 0.95;
   outline: solid green 2px;
-
-  /* outline-offset: calc(var(--cell-size) / -2); */
-  /* border-width: 5px; */
-  /* border-color: blue; */
 }
-
-/* .cell.highlighted::after {
-  content: '';
-  display: block;
-  border-radius: 50%;
-  box-sizing: border-box;
-  width: 10%;
-  height: 10%;
-  top: 40%;
-  left: 40%;
-  opacity: 0.9;
-  position: absolute;
-  background-color: green;
-} */
 
 .cell.selected::before {
   content: '';
@@ -277,7 +301,7 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  z-index: 999;
+  z-index: 990;
 }
 
 .bullet.red {
@@ -292,7 +316,7 @@ body {
   position: absolute;
   width: var(--cell-size);
   text-align: center;
-  z-index: 999;
+  z-index: 990;
   color: #f00;
   font-weight: bold;
   animation: 500ms fade ease-out;
@@ -312,5 +336,44 @@ body {
 }
 
 .modal {
+  position: absolute;
+  background-color: white;
+  opacity: 0.9;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* display: block; */
+  outline: solid red 4px;
+  z-index: 999;
+  /* display: flex; */
   display: none;
+  align-items: center;
+  justify-content: center;
 }
+
+.modal-dialog {
+  background-color: #d79765;
+  width: 25%;
+  border-radius: 5%;
+  height: 500px;
+  color: white;
+  opacity: 1;
+}
+
+.modal-header {
+  margin-top: 2%;
+  margin-left: 2%;
+}
+
+.close {
+  border-radius: 50%;
+}
+
+.modal-title {
+  font-size: 2rem;
+}
+
+/* .form {
+  opacity: 1;
+} */

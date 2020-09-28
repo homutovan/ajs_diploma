@@ -1,3 +1,5 @@
+import { getTotalPropBySide } from './utils';
+
 export default class Position {
   constructor(positionList) {
     this.positionList = positionList;
@@ -41,5 +43,7 @@ export default class Position {
     return this.positionList.find((el) => el.position === index);
   }
 
-  
+  getTotalHealth(side) {
+    return getTotalPropBySide(this.positionList, side, 'health');
+  }
 }

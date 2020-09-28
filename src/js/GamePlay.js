@@ -1,9 +1,15 @@
-import { calcHealthLevel, calcTileType, getBoard } from './utils';
+import {
+  calcHealthLevel,
+  calcTileType,
+  getBoard,
+  distanceMetric,
+} from './utils';
 
 export default class GamePlay {
-  constructor(boardSize) {
+  constructor(boardSize, side) {
     this.boardSize = boardSize;
     this.board = getBoard(boardSize);
+    this.side = side;
     this.container = null;
     this.boardEl = null;
     this.cells = [];
@@ -32,26 +38,30 @@ export default class GamePlay {
 
     this.container.innerHTML = `
       <div class="operation" id="player">
-        <div class="info">evil</div>
         <div class="controls">
           <button data-id="action-restart" class="btn">New Game</button>
           <button data-id="action-save" class="btn">Save Game</button>
           <button data-id="action-load" class="btn">Load Game</button>
           <button data-id="action-load" class="btn">Demo Game</button>
         </div>
-        <div class="info">good</div>
       </div>
+      <div class="turn-counter">56</div>
       <div class="board-container">
+        <div class="sidebar player"></div>
         <div data-id="board" class="board"id="enemy"></div>
+        <div class="sidebar enemy"></div>
       </div>
+      <div class="modal" id="modal-new-game"></div>
     `;
 
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
-    // this.modal = document.querySelector('#modal-new-game');
-    this.playerNameEl = this.container.querySelector('#player');
-    this.enemyNameEl = this.container.querySelector('#enemy');
+    this.modal = this.container.querySelector('#modal-new-game');
+    this.turnCounter = this.container.querySelector('.turn-counter');
+    this.drawSidebar(this.side, 'player');
+    this.drawSidebar(this.side === 'good' ? 'evil' : 'good', 'enemy');
+    // this.enemyNameEl = this.container.querySelector('#enemy');
 
     this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
@@ -71,6 +81,29 @@ export default class GamePlay {
     }
 
     this.cells = Array.from(this.boardEl.children);
+  }
+
+  drawSidebar(side, player) {
+    this.sidebarEl = this.container.querySelector(`.sidebar.${player}`);
+    this.addElement(this.sidebarEl, 'title side-title', side);
+    this.addElement(this.sidebarEl, 'title stat-title', 'number of characters');
+    this[`characterNumber${side}`] = this.addElement(this.sidebarEl, `${side} stats title number-of-characters`, '');
+    this.addElement(this.sidebarEl, 'title stat-title', 'total health');
+    this[`totalHealth${side}`] = this.addElement(this.sidebarEl, `${side} stats title total-health`, '');
+    this.addElement(this.sidebarEl, 'title stat-title', 'total damage');
+    this[`totalDamage${side}`] = this.addElement(this.sidebarEl, `${side} stats title total-damage`, '');
+    this.addElement(this.sidebarEl, 'title stat-title', 'characters killed');
+    this[`charactersKilled${side}`] = this.addElement(this.sidebarEl, `${side} stats title characters-killed`, '');
+    this.addElement(this.sidebarEl, 'title stat-title', 'enemies killed');
+    this[`enemiesKilled${side}`] = this.addElement(this.sidebarEl, `${side} stats title enemies-killed`, '');
+  }
+
+  addElement(parent, cssClass, text) {
+    const element = document.createElement('div');
+    element.innerText = text;
+    element.classList.add(...cssClass.split(' '));
+    parent.appendChild(element);
+    return element;
   }
 
   /**
@@ -97,6 +130,28 @@ export default class GamePlay {
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
+  }
+
+  updateStatistics(statistics) {
+    const { turn } = statistics;
+    this.updateSide(statistics.good, 'good');
+    this.updateSide(statistics.evil, 'evil');
+    this.turnCounter.innerText = `Turn: ${turn}`;
+  }
+
+  updateSide(sideStats, side) {
+    const {
+      numberCharacters,
+      totalHealth,
+      totalDamage,
+      charactersKilled,
+      enemiesKilled,
+    } = sideStats;
+    this[`characterNumber${side}`].innerText = numberCharacters;
+    this[`totalHealth${side}`].innerText = totalHealth;
+    this[`totalDamage${side}`].innerText = totalDamage;
+    this[`charactersKilled${side}`].innerText = charactersKilled;
+    this[`enemiesKilled${side}`].innerText = enemiesKilled;
   }
 
   /**
@@ -243,42 +298,69 @@ export default class GamePlay {
     });
   }
 
-  showDistanceAttack(from, to, color) {
-    // console.log('showDistanceAttack');
-    // console.log(color);
-    return new Promise((resolve) => {
-      const cellFrom = this.cells[from];
-      const cellTo = this.cells[to];
-      const bulletEl = document.createElement('span');
-      // damageEl.textContent = damage;
-      bulletEl.classList.add('bullet', color);
-      cellFrom.appendChild(bulletEl);
-      const {
-        x: startX, y: startY, width: startW, height: startH,
-      } = cellFrom.getBoundingClientRect();
-      const {
-        x: stopX, y: stopY, // width: stopW, height: stopH,
-      } = cellTo.getBoundingClientRect();
-      const deltaX = (stopX - startX) / 50;
-      const deltaY = (stopY - startY) / 50;
-      this.moveElement(bulletEl, startH / 2, startW / 2, deltaX, deltaY, stopX - startX, stopY - startY);
-      // cellFrom.removeChild(bulletEl);
-      // resolve();
-    });
+  animateAction(from, to, type, side) {
+    const cellFrom = this.cells[from];
+    const cellTo = this.cells[to];
+    const {
+      x: fromX, y: fromY, width: fromW, height: fromH,
+    } = cellFrom.getBoundingClientRect();
+    const {
+      x: toX, y: toY, width: toW, height: toH,
+    } = cellTo.getBoundingClientRect();
+    const startX = fromW / 2;
+    const startY = fromH / 2;
+    const stopX = toX - fromX;
+    const stopY = toY - fromY;
+    const distance = distanceMetric(from, to, this.boardSize);
+    if (type === 'attack') {
+      this.showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side);
+    } else {
+      this.showMoveCharacter(cellFrom, 0, 0, stopX, stopY);
+    }
   }
 
-  moveElement(element, posX, posY, deltaX, deltaY, stopX, stopY) {
-    // console.log('move');
-    // console.log(posX, posY, stopX);
-    // console.log(Math.abs(stopX - posX), deltaX);
-    if (Math.abs(stopX - posX) > Math.abs(deltaX) && Math.abs(stopY - posY) > Math.abs(deltaY)) {
-      element.style.top = `${posY}px`;
-      element.style.left = `${posX}px`;
-      setTimeout(
-        () => this.moveElement(element, posX + deltaX, posY + deltaY, deltaX, deltaY, stopX, stopY),
-        1,
-      );
+  showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side) {
+    const color = side === 'evil' ? 'red' : 'blue';
+    if (distance > 1) {
+      this.showDistanceAttack(cellFrom, startX, startY, stopX + toW / 2, stopY + toH / 2, color);
+    } else {
+      this.showHandToHandAttack(cellFrom, 0, 0, stopX, stopY);
     }
+  }
+
+  showMoveCharacter(cellFrom, startX, startY, stopX, stopY) {
+    const character = cellFrom.querySelector('.character');
+    this.moveElement(character, startX, startY, stopX, stopY, 300);
+  }
+
+  showHandToHandAttack(cellFrom, startX, startY, stopX, stopY) {
+    const attacker = cellFrom.querySelector('.character');
+    this.moveElement(attacker, startX, startY, stopX, stopY, 50);
+    this.moveElement(attacker, stopX, stopY, startX, startY, 50);
+  }
+
+  showDistanceAttack(source, startX, startY, stopX, stopY, color) {
+    const bulletEl = document.createElement('span');
+    bulletEl.classList.add('bullet', color);
+    source.appendChild(bulletEl);
+    this.moveElement(bulletEl, startX, startY, stopX, stopY, 50);
+  }
+
+  moveElement(element, startX, startY, stopX, stopY, time) {
+    console.log('move');
+    console.log(element, startX, startY, stopX, stopY, time);
+    const deltaX = (stopX - startX) / time;
+    const deltaY = (stopY - startY) / time;
+    const moveStep = (step) => setTimeout(
+      () => {
+        element.style.top = `${startY + deltaY * step}px`;
+        element.style.left = `${startX + deltaX * step}px`;
+        console.log('sdfs');
+        if (step < time) moveStep(step += 1);
+      },
+      1,
+    );
+    moveStep(0);
   }
 
   setCursor(cursor) {

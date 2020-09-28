@@ -47,6 +47,7 @@ export default class Character {
   constructor(level, type) {
     this.type = type;
     this.health = 50;
+    this._level = 1;
     this.level = level;
     if (new.target.name === 'Character') {
       throw new Error('Creating objects Character using new is illegal!');
@@ -54,8 +55,7 @@ export default class Character {
   }
 
   set level(value) { /// подумать
-    this._level = 1;
-    for (let level = this._level; level < value; level += 1) {
+    for (let level = this._level; level !== value; level += 1) {
       this.levelUp();
     }
   }
