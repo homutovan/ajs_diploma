@@ -70,9 +70,9 @@ export default class GameController {
   }
 
   enemyAction() {
-    // setTimeout(() => {
-    //   this.estimator.requestStrategy();
-    // }, 50);
+    setTimeout(() => {
+      this.estimator.requestStrategy();
+    }, 50);
   }
 
   async click(index) {

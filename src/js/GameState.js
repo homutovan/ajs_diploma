@@ -32,18 +32,22 @@ export default class GameState {
     const numberCharactersEvil = this.game.position.getTeamPosition('evil').length;
     const currTotalHealthGood = this.game.position.getTotalHealth('good');
     const currTotalHealthEvil = this.game.position.getTotalHealth('evil');
+    const totalDamageGood = this.getTurn(0) ? this.getTurn(0)
+      .totalHealth.evil - currTotalHealthEvil : 0;
+    const totalDamageEvil = this.getTurn(0) ? this.getTurn(0)
+      .totalHealth.good - currTotalHealthGood : 0;
     return {
       good: {
         numberCharacters: numberCharactersGood,
         totalHealth: currTotalHealthGood,
-        totalDamage: this.getTurn(0).totalHealth.evil - currTotalHealthEvil,
+        totalDamage: totalDamageGood,
         charactersKilled: this.game.teamSize - numberCharactersGood,
         enemiesKilled: this.game.teamSize - numberCharactersEvil,
       },
       evil: {
         numberCharacters: numberCharactersEvil,
         totalHealth: currTotalHealthEvil,
-        totalDamage: this.getTurn(0).totalHealth.good - currTotalHealthGood,
+        totalDamage: totalDamageEvil,
         charactersKilled: this.game.teamSize - numberCharactersEvil,
         enemiesKilled: this.game.teamSize - numberCharactersGood,
       },
