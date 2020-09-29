@@ -3,7 +3,12 @@ import cursors from './cursors';
 import Position from './Position';
 import GameState from './GameState';
 import Estimator from './Estimator';
-import { generatePosition, generateTeam, typeList, generateTheme } from './generators';
+import {
+  generatePosition,
+  generateTeam,
+  typeList,
+  generateTheme,
+} from './generators';
 import { getPropagation, changePlayers } from './utils';
 
 export default class GameController {
@@ -22,8 +27,8 @@ export default class GameController {
   }
 
   init() {
-    this.gamePlay.drawUi(this.theme);
-    this.demo = true;
+    this.gamePlay.init(this.theme);
+    // this.demo = true;
 
     this.evilTeam = generateTeam(
       typeList.slice(0, typeList.length / 2),
@@ -64,10 +69,10 @@ export default class GameController {
   }
 
   set turn(value) {
+    this._turn = value;
     if (value && this._turn) {
       [this.side, this.enemySide] = [this.enemySide, this.side];
     }
-    this._turn = value;
     this.position.currentTurn = this._turn;
     this.position.gameStage = this.gameStage;
     this.characterCells = this.position.getAllIndex();
@@ -140,9 +145,9 @@ export default class GameController {
     }
   }
 
-  async movePosition(index) {
+  movePosition(index) {
     const position = this.activePosition;
-    await this.gamePlay.animateAction(position.position, index, 'move');
+    this.gamePlay.animateAction(position.position, index, 'move');
     // console.log('dfsf');
     this.deactivatePosition();
     position.position = index;

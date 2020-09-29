@@ -12,6 +12,10 @@ export default class GamePlay {
     this.board = getBoard(boardSize);
     this.side = side;
     this.container = null;
+    // this.init();
+  }
+
+  init(theme) {
     this.boardEl = null;
     this.cells = [];
     this.cellClickListeners = [];
@@ -20,6 +24,7 @@ export default class GamePlay {
     this.newGameListeners = [];
     this.saveGameListeners = [];
     this.loadGameListeners = [];
+    this.drawUi(theme);
   }
 
   bindToDOM(container) {
@@ -118,7 +123,6 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
-    
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
@@ -250,6 +254,8 @@ export default class GamePlay {
   }
 
   showError(message) {
+    console.log(this.cellClickListeners);
+    console.log(message);
     alert(message);
   }
 
@@ -355,21 +361,29 @@ export default class GamePlay {
     this.moveElement(bulletEl, startX, startY, stopX, stopY, 50);
   }
 
-  moveElement(element, startX, startY, stopX, stopY, time) {
+  async moveElement(element, startX, startY, stopX, stopY, time) {
     // console.log('move');
     // console.log(element, startX, startY, stopX, stopY, time);
     const deltaX = (stopX - startX) / time;
     const deltaY = (stopY - startY) / time;
-    const moveStep = (step) => setTimeout(
-      () => {
-        element.style.top = `${startY + deltaY * step}px`;
-        element.style.left = `${startX + deltaX * step}px`;
-        // console.log('sdfs');
-        if (step < time) moveStep(step += 1);
-      },
-      1,
-    );
-    moveStep(0);
+    // const moveStep = (step) => setTimeout(
+    //   () => {
+    //     element.style.top = `${startY + deltaY * step}px`;
+    //     element.style.left = `${startX + deltaX * step}px`;
+    //     // console.log('sdfs');
+    //     if (step < time) moveStep(step += 1);
+    //   },
+    //   1,
+    // );
+    await this.moveStep(element, 0, time, startY, deltaY, startX, deltaX);
+  }
+
+  async moveStep(element, step, time, startY, deltaY, startX, deltaX) {
+    return new Promise((resolve) => setTimeout(() => {
+      element.style.top = `${startY + deltaY * step}px`;
+      element.style.left = `${startX + deltaX * step}px`;
+      if (step < time) this.moveStep(step += 1);
+    }, 1));
   }
 
   setCursor(cursor) {

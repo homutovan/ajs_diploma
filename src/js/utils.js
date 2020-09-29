@@ -1,4 +1,4 @@
-export const changePlayers = { good: 'evil', evil: 'good' }
+export const changePlayers = { good: 'evil', evil: 'good' };
 
 export function calcTileType(index, board) {
   const len = board.length;

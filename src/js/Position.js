@@ -37,12 +37,12 @@ export default class Position {
     this.teamSize = {};
     this.currentTurn = 0;
     this.gameStage = 0;
-    // this.status = true;
-    // this.winner = null;
 
     for (const side in changePlayers) {
-      this.initTotalHealth[side] = this.getTotalHealth(side);
-      this.teamSize[side] = this.getTeamPosition(side).length;
+      if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {
+        this.initTotalHealth[side] = this.getTotalHealth(side);
+        this.teamSize[side] = this.getTeamPosition(side).length;
+      }
     }
   }
 
@@ -65,30 +65,25 @@ export default class Position {
   }
 
   calcStatistics() {
-    
-    this.statistics = { 
+    this.statistics = {
       currentTurn: this.currentTurn,
       gameStage: this.gameStage,
-    }
+    };
     for (const side in changePlayers) {
+      if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {
+        const numberCharacters = this.getTeamPosition(side).length;
+        const numberCharactersEnemy = this.getTeamPosition(changePlayers[side]).length;
+        const totalHealth = this.getTotalHealth(side);
+        const currTotalHealthEnemy = this.getTotalHealth(changePlayers[side]);
+        const totalDamage = this.initTotalHealth[changePlayers[side]] - currTotalHealthEnemy;
 
-      const numberCharacters = this.getTeamPosition(side).length;
-      const numberCharactersEnemy = this.getTeamPosition(changePlayers[side]).length;
-      const currTotalHealth = this.getTotalHealth(side);
-      const currTotalHealthEnemy = this.getTotalHealth(changePlayers[side]);
-      const totalDamage = this.initTotalHealth[changePlayers[side]] - currTotalHealthEnemy;
-
-      // if (!numberCharacters) {
-      //   this.status = false;
-      //   this.winner = changePlayers[side];
-      // }
-
-      this.statistics[side] = {
-        numberCharacters: numberCharacters,
-        totalHealth: currTotalHealth,
-        totalDamage: totalDamage,
-        charactersKilled: this.teamSize[side] - numberCharacters,
-        enemiesKilled: this.teamSize[changePlayers[side]] - numberCharactersEnemy,
+        this.statistics[side] = {
+          numberCharacters,
+          totalHealth,
+          totalDamage,
+          charactersKilled: this.teamSize[side] - numberCharacters,
+          enemiesKilled: this.teamSize[changePlayers[side]] - numberCharactersEnemy,
+        };
       }
     }
   }

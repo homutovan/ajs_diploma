@@ -1,7 +1,7 @@
 import Character, { charStats } from './Character';
 import PositionedCharacter from './PositionedCharacter';
 import { getRandomElement } from './utils';
-import themes from './themes'
+import themes from './themes';
 
 export const typeList = Object.keys(charStats).map((type) => class extends Character {
   constructor(level) {
