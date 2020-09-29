@@ -3,6 +3,7 @@ import {
   calcTileType,
   getBoard,
   distanceMetric,
+  changePlayers,
 } from './utils';
 
 export default class GamePlay {
@@ -45,7 +46,11 @@ export default class GamePlay {
           <button data-id="action-load" class="btn">Demo Game</button>
         </div>
       </div>
-      <div class="turn-counter">56</div>
+      <div class="game-info">
+        <div class="turn-counter"></div>
+        <div class="game-stage"></div>
+        <div class="game-timer"></div>
+      </div>
       <div class="board-container">
         <div class="sidebar player"></div>
         <div data-id="board" class="board"id="enemy"></div>
@@ -59,9 +64,10 @@ export default class GamePlay {
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
     this.modal = this.container.querySelector('#modal-new-game');
     this.turnCounter = this.container.querySelector('.turn-counter');
+    this.gameStage = this.container.querySelector('.game-stage');
+    this.gameTimer = this.container.querySelector('.game-timer');
     this.drawSidebar(this.side, 'player');
-    this.drawSidebar(this.side === 'good' ? 'evil' : 'good', 'enemy');
-    // this.enemyNameEl = this.container.querySelector('#enemy');
+    this.drawSidebar(changePlayers[this.side], 'enemy');
 
     this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
@@ -112,6 +118,7 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
+    
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
@@ -130,13 +137,15 @@ export default class GamePlay {
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
+    this.updateStatistics(positions.statistics);
   }
 
   updateStatistics(statistics) {
-    const { turn } = statistics;
+    const { currentTurn, gameStage } = statistics;
     this.updateSide(statistics.good, 'good');
     this.updateSide(statistics.evil, 'evil');
-    this.turnCounter.innerText = `Turn: ${turn}`;
+    this.turnCounter.innerText = `Turn: ${currentTurn}`;
+    this.gameStage.innerText = `Stage: ${gameStage}`;
   }
 
   updateSide(sideStats, side) {
@@ -347,15 +356,15 @@ export default class GamePlay {
   }
 
   moveElement(element, startX, startY, stopX, stopY, time) {
-    console.log('move');
-    console.log(element, startX, startY, stopX, stopY, time);
+    // console.log('move');
+    // console.log(element, startX, startY, stopX, stopY, time);
     const deltaX = (stopX - startX) / time;
     const deltaY = (stopY - startY) / time;
     const moveStep = (step) => setTimeout(
       () => {
         element.style.top = `${startY + deltaY * step}px`;
         element.style.left = `${startX + deltaX * step}px`;
-        console.log('sdfs');
+        // console.log('sdfs');
         if (step < time) moveStep(step += 1);
       },
       1,

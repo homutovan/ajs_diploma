@@ -1,3 +1,5 @@
+export const changePlayers = { good: 'evil', evil: 'good' }
+
 export function calcTileType(index, board) {
   const len = board.length;
   return board[(index - (index % len)) / len][index % len];

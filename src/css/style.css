@@ -56,8 +56,11 @@ body {
   flex-wrap: wrap;
 }
 
-.turn-counter {
+.turn-counter,
+.game-stage {
   margin-bottom: 2rem;
+  margin-left: 2rem;
+  margin-right: 2rem;
   font-size: 2rem;
   text-align: center;
   color: white;
@@ -69,21 +72,24 @@ body {
   grid-row-gap: 2px;
 }
 
+.game-info {
+  display: flex;
+  justify-content: center;
+}
+
 .sidebar {
-  /* background-image: url('../img/prairie/map-tile-center.png'); */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   border-image: url('../img/prairie/map-tile-center.png');
   border-image-width: 5px;
-  /* border: solid black 1px; */
   border-width: 10px;
-  /* border-style: solid; */
   margin: 0 5%;
   padding: 20px;
-  /* width: 200px; */
   border-radius: 2rem;
 }
 
 .title {
-  margin-bottom: 30px;
   font-size: 3rem;
   text-transform: capitalize;
   color: white;
@@ -91,7 +97,7 @@ body {
 }
 
 .side-title {
-  margin-bottom: 30px;
+  /* margin-bottom: 30px; */
 }
 
 .stat-title {

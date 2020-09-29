@@ -1,6 +1,7 @@
 import Character, { charStats } from './Character';
 import PositionedCharacter from './PositionedCharacter';
 import { getRandomElement } from './utils';
+import themes from './themes'
 
 export const typeList = Object.keys(charStats).map((type) => class extends Character {
   constructor(level) {
@@ -39,3 +40,15 @@ export function generatePosition(characterList, boardSize, side) {
   }
   return characterList.map((character, i) => new PositionedCharacter(character, position[i]));
 }
+
+export function* generateTheme(startTheme = 'prairie') {
+  const themeList = Object.keys(themes);
+  const start = themeList.indexOf(startTheme)
+  const len = themeList.length;
+  while (true) {
+    for (let i = start; i < len; i += 1) {
+      yield themeList[i];
+    }
+  }
+}
+

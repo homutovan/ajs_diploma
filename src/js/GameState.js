@@ -1,6 +1,5 @@
 import Character from './Character';
 import PositionedCharacter from './PositionedCharacter';
-import { getTotalPropBySide } from './utils';
 
 export default class GameState {
   constructor(game, driver) {
@@ -18,56 +17,18 @@ export default class GameState {
     }
   }
 
-  getStatistics() {
-    const { evil, good } = this.sideStatistics();
-    return {
-      turn: this.game.turn,
-      evil,
-      good,
-    };
-  }
-
-  sideStatistics() {
-    const numberCharactersGood = this.game.position.getTeamPosition('good').length;
-    const numberCharactersEvil = this.game.position.getTeamPosition('evil').length;
-    const currTotalHealthGood = this.game.position.getTotalHealth('good');
-    const currTotalHealthEvil = this.game.position.getTotalHealth('evil');
-    const totalDamageGood = this.getTurn(0) ? this.getTurn(0)
-      .totalHealth.evil - currTotalHealthEvil : 0;
-    const totalDamageEvil = this.getTurn(0) ? this.getTurn(0)
-      .totalHealth.good - currTotalHealthGood : 0;
-    return {
-      good: {
-        numberCharacters: numberCharactersGood,
-        totalHealth: currTotalHealthGood,
-        totalDamage: totalDamageGood,
-        charactersKilled: this.game.teamSize - numberCharactersGood,
-        enemiesKilled: this.game.teamSize - numberCharactersEvil,
-      },
-      evil: {
-        numberCharacters: numberCharactersEvil,
-        totalHealth: currTotalHealthEvil,
-        totalDamage: totalDamageEvil,
-        charactersKilled: this.game.teamSize - numberCharactersEvil,
-        enemiesKilled: this.game.teamSize - numberCharactersGood,
-      },
-    };
-  }
-
   traceTurn(trackedFunction) {
     return async (arg) => {
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
         this.state.currentTurn = this.game.turn;
+        this.state.stage = this.game.gameStage;
         this.state.history.push({
+          stage: this.game.gameStage,
           turn: this.game.turn,
           side: this.game.side,
           action: this.game.action.name,
           from: this.game.activePosition.position,
           to: arg,
-          totalHealth: {
-            evil: this.game.position.getTotalHealth('evil'),
-            good: this.game.position.getTotalHealth('good'),
-          },
         });
         await trackedFunction.call(this.game, arg);
         this.saveTurn();
@@ -85,10 +46,6 @@ export default class GameState {
     this.state.board = [...this.game.position]
       .map((position) => this.positionToObj(position));
     this.driver.save(this.state);
-  }
-
-  getTurn(turn) {
-    return this.state.history[turn];
   }
 
   getLastTurn() {
