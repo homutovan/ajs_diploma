@@ -24,6 +24,7 @@ export default class GamePlay {
     this.newGameListeners = [];
     this.saveGameListeners = [];
     this.loadGameListeners = [];
+    this.demoGameListeners =[];
     this.drawUi(theme);
   }
 
@@ -48,7 +49,7 @@ export default class GamePlay {
           <button data-id="action-restart" class="btn">New Game</button>
           <button data-id="action-save" class="btn">Save Game</button>
           <button data-id="action-load" class="btn">Load Game</button>
-          <button data-id="action-load" class="btn">Demo Game</button>
+          <button data-id="action-demo" class="btn">Demo Game</button>
         </div>
       </div>
       <div class="game-info">
@@ -67,7 +68,9 @@ export default class GamePlay {
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
+    this.demoGameEl = this.container.querySelector('[data-id=action-demo]');
     this.modal = this.container.querySelector('#modal-new-game');
+    console.log(this.modal);
     this.turnCounter = this.container.querySelector('.turn-counter');
     this.gameStage = this.container.querySelector('.game-stage');
     this.gameTimer = this.container.querySelector('.game-timer');
@@ -77,6 +80,7 @@ export default class GamePlay {
     this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
     this.loadGameEl.addEventListener('click', (event) => this.onLoadGameClick(event));
+    this.demoGameEl.addEventListener('click', (event) => this.onDemoGameClick(event));
 
     this.boardEl = this.container.querySelector('[data-id=board]');
     this.boardEl.style['grid-template-columns'] = `repeat(${this.boardSize}, 1fr)`;
@@ -115,6 +119,10 @@ export default class GamePlay {
     element.classList.add(...cssClass.split(' '));
     parent.appendChild(element);
     return element;
+  }
+
+  drawModal() {
+
   }
 
   /**
@@ -200,7 +208,7 @@ export default class GamePlay {
    * @param callback
    */
   addNewGameListener(callback) {
-    this.newGameListeners.push();
+    this.newGameListeners.push(callback);
   }
 
   /**
@@ -219,6 +227,15 @@ export default class GamePlay {
    */
   addLoadGameListener(callback) {
     this.loadGameListeners.push(callback);
+  }
+
+    /**
+   * Add listener to "Load Game" button click
+   *
+   * @param callback
+   */
+  addDemoGameListener(callback) {
+    this.demoGameListeners.push(callback);
   }
 
   onCellEnter(event) {
@@ -251,6 +268,11 @@ export default class GamePlay {
   onLoadGameClick(event) {
     event.preventDefault();
     this.loadGameListeners.forEach((o) => o.call(null));
+  }
+
+  onDemoGameClick(event) {
+    event.preventDefault();
+    this.demoGameListeners.forEach((o) => o.call(null));
   }
 
   showError(message) {

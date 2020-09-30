@@ -46,12 +46,17 @@ export default class GameController {
       ...generatePosition(this.evilTeam, this.gamePlay.boardSize, this.enemySide),
     ]);
 
-    this.onCellClick = this.gameState.traceTurn(this.click);
+    this.onCellClick = this.gameState.traceAction(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    // this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
-    if (this.stateService.loadStatus && this.gameState.stage === this.gameStage) {
+    this.gamePlay.addNewGameListener(() => console.log('new'));
+    this.gamePlay.addSaveGameListener(() => console.log('save'));
+    this.gamePlay.addLoadGameListener(() => console.log('load'));
+    this.gamePlay.addDemoGameListener(() => console.log('demo'));
+    // console.log(this.gameState.state.stage);
+    console.log(this.stateService.loadStatus, this.gameState.state.stage, this.gameStage)
+    if (this.stateService.loadStatus && this.gameState.state.stage === this.gameStage) {
       this.gameState.recoverTurn();
     } else {
       this.turn = 0;
@@ -60,8 +65,8 @@ export default class GameController {
 
   set gameStage(value) {
     this.theme = this.generateTheme.next().value;
-    this.init();
     this._gameStage = value;
+    this.init();
   }
 
   get gameStage() {

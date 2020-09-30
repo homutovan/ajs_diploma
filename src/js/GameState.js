@@ -17,7 +17,7 @@ export default class GameState {
     }
   }
 
-  traceTurn(trackedFunction) {
+  traceAction(trackedFunction) {
     return async (arg) => {
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
         this.state.currentTurn = this.game.turn;
@@ -39,6 +39,7 @@ export default class GameState {
 
   recoverTurn() {
     this.objToPosition(this.game.position);
+    // this.game.gameStage = this.state.stage;
     this.game.turn = this.state.currentTurn;
   }
 
