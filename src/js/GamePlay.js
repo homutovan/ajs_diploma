@@ -313,7 +313,7 @@ export default class GamePlay {
     });
   }
 
-  animateAction(from, to, type, side) {
+  async animateAction(from, to, type, side) {
     const cellFrom = this.cells[from];
     const cellTo = this.cells[to];
     const {
@@ -328,62 +328,56 @@ export default class GamePlay {
     const stopY = toY - fromY;
     const distance = distanceMetric(from, to, this.boardSize);
     if (type === 'attack') {
-      this.showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side);
+      await this.showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side);
     } else {
-      this.showMoveCharacter(cellFrom, 0, 0, stopX, stopY);
+      await this.showMoveCharacter(cellFrom, 0, 0, stopX, stopY);
     }
   }
 
-  showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side) {
+  async showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side) {
     const color = side === 'evil' ? 'red' : 'blue';
     if (distance > 1) {
-      this.showDistanceAttack(cellFrom, startX, startY, stopX + toW / 2, stopY + toH / 2, color);
+      await this.showDistanceAttack(cellFrom, startX, startY, stopX + toW / 2, stopY + toH / 2, color);
     } else {
-      this.showHandToHandAttack(cellFrom, 0, 0, stopX, stopY);
+      await this.showHandToHandAttack(cellFrom, 0, 0, stopX, stopY);
     }
   }
 
-  showMoveCharacter(cellFrom, startX, startY, stopX, stopY) {
+  async showMoveCharacter(cellFrom, startX, startY, stopX, stopY) {
     const character = cellFrom.querySelector('.character');
-    this.moveElement(character, startX, startY, stopX, stopY, 300);
+    await this.moveElement(character, startX, startY, stopX, stopY, 50);
   }
 
-  showHandToHandAttack(cellFrom, startX, startY, stopX, stopY) {
+  async showHandToHandAttack(cellFrom, startX, startY, stopX, stopY) {
     const attacker = cellFrom.querySelector('.character');
-    this.moveElement(attacker, startX, startY, stopX, stopY, 50);
-    this.moveElement(attacker, stopX, stopY, startX, startY, 50);
+    await this.moveElement(attacker, startX, startY, stopX, stopY, 50);
+    await this.moveElement(attacker, stopX, stopY, startX, startY, 50);
   }
 
-  showDistanceAttack(source, startX, startY, stopX, stopY, color) {
+  async showDistanceAttack(source, startX, startY, stopX, stopY, color) {
     const bulletEl = document.createElement('span');
     bulletEl.classList.add('bullet', color);
     source.appendChild(bulletEl);
-    this.moveElement(bulletEl, startX, startY, stopX, stopY, 50);
+    await this.moveElement(bulletEl, startX, startY, stopX, stopY, 50);
   }
 
   async moveElement(element, startX, startY, stopX, stopY, time) {
-    // console.log('move');
-    // console.log(element, startX, startY, stopX, stopY, time);
     const deltaX = (stopX - startX) / time;
     const deltaY = (stopY - startY) / time;
-    // const moveStep = (step) => setTimeout(
-    //   () => {
-    //     element.style.top = `${startY + deltaY * step}px`;
-    //     element.style.left = `${startX + deltaX * step}px`;
-    //     // console.log('sdfs');
-    //     if (step < time) moveStep(step += 1);
-    //   },
-    //   1,
-    // );
     await this.moveStep(element, 0, time, startY, deltaY, startX, deltaX);
   }
 
   async moveStep(element, step, time, startY, deltaY, startX, deltaX) {
-    return new Promise((resolve) => setTimeout(() => {
-      element.style.top = `${startY + deltaY * step}px`;
-      element.style.left = `${startX + deltaX * step}px`;
-      if (step < time) this.moveStep(step += 1);
-    }, 1));
+    element.style.top = `${startY + deltaY * step}px`;
+    element.style.left = `${startX + deltaX * step}px`;
+    if (step < time) {
+      return new Promise((resolve) => {
+        setTimeout(
+          () => resolve(this.moveStep(element, step += 1, time, startY, deltaY, startX, deltaX)), 
+          1,
+          )
+      });
+    }
   }
 
   setCursor(cursor) {

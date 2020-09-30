@@ -28,7 +28,7 @@ export default class GameController {
 
   init() {
     this.gamePlay.init(this.theme);
-    // this.demo = true;
+    this.demo = true;
 
     this.evilTeam = generateTeam(
       typeList.slice(0, typeList.length / 2),
@@ -145,19 +145,18 @@ export default class GameController {
     }
   }
 
-  movePosition(index) {
+  async movePosition(index) {
     const position = this.activePosition;
-    this.gamePlay.animateAction(position.position, index, 'move');
-    // console.log('dfsf');
     this.deactivatePosition();
-    position.position = index;
     this.gamePlay.deselectCell(index);
+    await this.gamePlay.animateAction(position.position, index, 'move');
+    position.position = index;
   }
 
   async attackPosition(index) {
     const position = this.position.getPositionByIndex(index);
-    this.gamePlay.animateAction(this.activePosition.position, index, 'attack', this.side);
     const damage = position.character.getDamage(this.activePosition.character.attack);
+    await this.gamePlay.animateAction(this.activePosition.position, index, 'attack', this.side);
     this.deactivatePosition();
     this.gamePlay.deselectCell(index);
     await this.gamePlay.showDamage(index, damage);
