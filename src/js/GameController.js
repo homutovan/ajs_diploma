@@ -1,6 +1,6 @@
 import themes from './themes';
 import cursors from './cursors';
-import Position from './Position';
+import Team from './Team';
 import GameState from './GameState';
 import Estimator from './Estimator';
 import {
@@ -17,9 +17,7 @@ export default class GameController {
     this.stateService = stateService;
     this.gameState = new GameState(this, stateService);
     this.estimator = new Estimator(this);
-    this.generateTheme = generateTheme();
-    // this.activePosition = null;
-    console.log(this.stateService.loadStatus);
+    // console.log(this.stateService.loadStatus);
     if (this.stateService.loadStatus) {
       this.loadGame();
     } else {
@@ -29,13 +27,13 @@ export default class GameController {
   }
 
   init() {
-    console.log('controller init');
-    this.gamePlay.init(this.theme, this.boardSize, this.side);
+    // console.log('controller init');
+    this.gamePlay.init(this.theme, this.boardSize, this.initialSide);
     this.onCellClick = this.gameState.traceAction(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this));
+    this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this.gamePlay));
     this.gamePlay.addSaveGameListener(() => console.log('save'));
     this.gamePlay.addLoadGameListener(() => console.log('load'));
     this.gamePlay.addDemoGameListener(() => console.log('demo'));
@@ -46,9 +44,10 @@ export default class GameController {
     this.boardSize = boardSize;
     this.teamSize = teamSize;
     this.maxCharacterLevel = maxCharacterLevel;
+    this.initialSide = side;
     this.side = side;
-    this.enemySide = changePlayers[side];
     this.demo = demo;
+    this.generateTheme = generateTheme();
     this.gameStage = 1;
   }
 
@@ -70,10 +69,28 @@ export default class GameController {
       this.teamSize,
     );
 
-    this.position = new Position([
+    this.team = new Team([
       ...generatePosition(this.goodTeam, this.boardSize, this.side),
       ...generatePosition(this.evilTeam, this.boardSize, this.enemySide),
     ]);
+  }
+
+  set initialSide(value) {
+    this._initialSide = value;
+    this.estimator.side = changePlayers[value];
+  }
+
+  get initialSide() {
+    return this._initialSide;
+  }
+
+  set side(value) {
+    this._side = value;
+    this.enemySide = changePlayers[value];
+  }
+
+  get side() {
+    return this._side;
   }
 
   set timer(value) {
@@ -87,10 +104,7 @@ export default class GameController {
 
   set gameStage(value) {
     console.log('gameStage');
-    // if (value - this._gameStage === 1) {
-    //   // this.timer = 0;
-    //   // this.turn = 0;
-    // }
+    this.side = this.initialSide;
     this.theme = this.generateTheme.next().value;
     this.init();
     this.generateTeams();
@@ -104,22 +118,26 @@ export default class GameController {
   }
 
   set turn(value) {
-    console.log('set turn');
+    // console.log('set turn');
     if (value - this._turn === 1) {
       [this.side, this.enemySide] = [this.enemySide, this.side];
     }
     this._turn = value;
-    console.log(this.position);
-    this.position.currentTurn = this._turn;
-    this.position.gameStage = this.gameStage;
-    this.characterCells = this.position.getAllIndex();
-    this.playerCharacterCells = this.position.getTeamPosition(this.side);
-    console.log(this.playerCharacterCells);
-    this.enemyCharacterCells = this.position.getTeamPosition(this.enemySide);
-    this.gamePlay.redrawPositions(this.position);
-    console.log('redraw end');
-    // if (this.checkWinner()) return null;
-    // if (this.side === this.estimator.side || this.demo) this.enemyAction();
+    // console.log(this.team);
+    this.team.currentTurn = this._turn;
+    this.team.gameStage = this.gameStage;
+    // this.characterCells = this.team.getAllIndex();
+    this.playerCharacterCells = this.team.getTeamPosition(this.side);
+    // console.log(this.side);
+    // console.log(this.playerCharacterCells);
+    this.enemyCharacterCells = this.team.getTeamPosition(this.enemySide);
+    // console.log(this.enemyCharacterCells);
+    this.characterCells = [...this.playerCharacterCells, ...this.enemyCharacterCells];
+    this.gamePlay.redrawPositions(this.team);
+    // console.log('redraw end');
+    if (this.checkWinner()) return null;
+    console.log(this.side, this.estimator.side);
+    if (this.side === this.estimator.side || this.demo) this.enemyAction();
     return null;
   }
 
@@ -129,14 +147,20 @@ export default class GameController {
 
   checkWinner() {
     if (!this.playerCharacterCells.length * this.enemyCharacterCells.length) {
-      const winner = this.position.getPositionByIndex(this.characterCells[0]).character.side;
+      const winner = this.team.getPositionByIndex(this.characterCells[0]).character.side;
       console.log(winner);
       this.gameStage += 1;
       return true;
     }
+    return false;
   }
 
-  enemyAction() {
+  async enemyAction() {
+    // this.blocked = false;
+    // console.log('blocked');
+    // await this.estimator.requestStrategy();
+    // this.blocked = true;
+    // console.log('unblocked');
     setTimeout(() => {
       this.estimator.requestStrategy();
     }, 50);
@@ -147,10 +171,15 @@ export default class GameController {
   }
 
   onCellEnter(index) {
-    const position = this.position.getPositionByIndex(index);
+    const position = this.team.getPositionByIndex(index);
     if (position) {
       const message = position.getMessage();
       this.gamePlay.showCellTooltip(message, index);
+    }
+
+    if (this.blocked) {
+      this.action = () => this.gamePlay.showError('Управление заблокировано!');
+      return null;
     }
 
     if (this.activePosition) {
@@ -194,7 +223,7 @@ export default class GameController {
   }
 
   async attackPosition(index) {
-    const position = this.position.getPositionByIndex(index);
+    const position = this.team.getPositionByIndex(index);
     const damage = position.character.getDamage(this.activePosition.character.attack);
     await this.gamePlay.animateAction(this.activePosition.position, index, 'attack', this.side);
     this.deactivatePosition();
@@ -204,7 +233,7 @@ export default class GameController {
 
   activatePosition(index) {
     this.deactivatePosition();
-    const position = this.position.getPositionByIndex(index);
+    const position = this.team.getPositionByIndex(index);
     if (position) {
       if (position.character.side === this.side) {
         this.activePosition = position;

@@ -1,4 +1,5 @@
-import { getTemplatePosition } from './generators';
+import { changePlayers } from './utils';
+import { generateTheme } from './generators';
 
 export default class GameState {
   constructor(game, driver) {
@@ -11,7 +12,7 @@ export default class GameState {
     try {
       this.state = this.driver.load();
     } catch (e) {
-      console.log(e);
+      // console.log(e);
       this.state = { history: [] };
     }
   }
@@ -34,7 +35,11 @@ export default class GameState {
     this.state.boardSize = this.game.boardSize;
     this.state.teamSize = this.game.teamSize;
     this.state.demo = this.game.demo;
-    this.state.side = this.game.side;
+    this.state.initialSide = this.game.initialSide;
+    this.state.side = changePlayers[this.game.side];
+    this.state.initTotalHealth = this.game.team.initTotalHealth;
+    // this.state.teamSize = this.game.team.teamSize;
+    // this.state.statistics = this.game.team.statistics;
     this.state.maxCharacterLevel = this.game.maxCharacterLevel;
     this.state.history.push({
       stage: this.game.gameStage,
@@ -53,16 +58,18 @@ export default class GameState {
     this.game.teamSize = this.state.teamSize;
     this.game.maxCharacterLevel = this.state.maxCharacterLevel;
     this.game.demo = this.state.demo;
-    this.game.side = this.state.side
+    this.game.initialSide = this.state.initialSide;
+    this.game.side = this.state.side;
+    this.game.generateTheme = generateTheme(this.state.stage - 1);
     this.game.gameStage = this.state.stage;
-    this.game.turn = this.state.currentTurn;
     this.game.timer = this.state.timer;
-    this.objToPosition();
+    this.objToTeam();
+    this.game.turn = this.state.currentTurn + 1;
   }
 
   saveTurn() {
-    this.state.board = [...this.game.position]
-      .map((position) => this.positionToObj(position));
+    this.state.board = [...this.game.team]
+      .map((position) => this.teamToObj(position));
     this.driver.save(this.state);
   }
 
@@ -70,7 +77,7 @@ export default class GameState {
     return this.state.history[this.state.history.length - 1];
   }
 
-  positionToObj(position) {
+  teamToObj(position) {
     const obj = { character: {} };
     obj.position = position.position;
     for (const property in position.character) {
@@ -81,21 +88,26 @@ export default class GameState {
     return obj;
   }
 
-  objToPosition() {
+  objToTeam() {
     // const charactersNumber = Math.ceil(this.state.board.length) / 2;
     // this.game.teamSize = charactersNumber;
     // this.game.maxCharacterLevel = 1;
     // this.game.generateTeams();
-    const { position } = this.game;
+    const { team } = this.game;
     // console.log('getTemplatePosition');
     // console.log(getTemplatePosition(10));
-    const delta = [...position].length - this.state.board.length;
+    const delta = [...team].length - this.state.board.length;
+    // console.log([...team].length);
+    // console.log(delta);
     const pass = Array(delta).fill({ position: -1, character: { health: 0 } });
-    [...position].forEach((pos, i) => this.fitPosition(pos, [...this.state.board, ...pass][i]));
+    [...team].forEach((pos, i) => this.fitTeam(pos, [...this.state.board, ...pass][i]));
+    // team.statistics = this.state.statistics;
+    team.initTotalHealth = this.state.initTotalHealth;
+    team.teamSize = { good: this.state.teamSize, evil: this.state.teamSize };
   }
 
   /* eslint no-param-reassign: "error" */
-  fitPosition(position, object) {
+  fitTeam(position, object) {
     position.position = object.position;
     for (const property in position.character) {
       if (Object.prototype.hasOwnProperty.call(position.character, property)) {

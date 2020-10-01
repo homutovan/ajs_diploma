@@ -6,8 +6,8 @@ export default class Estimator {
     this.side = this.game.enemySide;
   }
 
-  requestStrategy() {
-    this.randomStrategy();
+  async requestStrategy() {
+    await this.randomStrategy();
     // if (this.side === this.game.side) {
     //   console.log('random action');
     //   this.randomStrategy();
@@ -28,9 +28,9 @@ export default class Estimator {
     this.randomStrategy();
   }
 
-  randomStrategy() {
+  async randomStrategy() {
     const availableCharacter = this.game.playerCharacterCells;
-    console.log(`availableCharacter: ${availableCharacter}`);
+    // console.log(`availableCharacter: ${availableCharacter}`);
     let loop = true;
     while (loop) {
       const selectIndex = getRandomElement(availableCharacter);

@@ -137,13 +137,14 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
-    console.log('redrawPositions');
+    // console.log('redrawPositions');
     // console.log(positions);
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
 
     for (const position of positions) {
+      // console.log(position);
       const cellEl = this.boardEl.children[position.position];
       const charEl = document.createElement('div');
       charEl.classList.add('character', position.character.type);
@@ -157,6 +158,7 @@ export default class GamePlay {
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
+    this.deselectAll();
     this.updateStatistics(positions.statistics);
   }
 
@@ -290,8 +292,8 @@ export default class GamePlay {
   }
 
   showError(message) {
-    console.log(this.cellClickListeners);
-    console.log(message);
+    // console.log(this.cellClickListeners);
+    // console.log(message);
     alert(message);
   }
 
@@ -308,6 +310,14 @@ export default class GamePlay {
     const cell = this.cells[index];
     cell.classList.remove(...Array.from(cell.classList)
       .filter((o) => o.startsWith('selected')));
+  }
+
+  deselectAll() {
+    const selected = this.container.querySelectorAll('.selected');
+    const entered = this.container.querySelectorAll('.entered');
+    [...entered].map((cell) => cell.classList.remove('entered'));
+    [...selected].map((cell) => cell.classList.remove(...Array.from(cell.classList)
+      .filter((o) => o.startsWith('selected'))));
   }
 
   enterCell(index) {
@@ -432,8 +442,6 @@ export default class GamePlay {
   }
 
   showModal() {
-    console.log('asdfa');
-    // this.modal.style.display = 'block';
-    console.log(this.modal);
+    this.modal.style.display = 'block';
   }
 }

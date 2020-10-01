@@ -17,20 +17,18 @@ export const typeList = Object.keys(charStats).map((type) => class extends Chara
  * @returns Character type children (ex. Magician, Bowman, etc)
  */
 export function* characterGenerator(allowedTypes, maxLevel) {
-  console.log('characterGenerator');
-  console.log(allowedTypes, maxLevel);
+  // console.log('characterGenerator');
+  // console.log(allowedTypes, maxLevel);
   const level = Math.floor(Math.random() * maxLevel) + 1;
   yield new (getRandomElement(allowedTypes))(level);
 }
 
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
-  console.log('generateTeam');
-  console.log(`maxLevel: ${maxLevel}`)
+  // console.log('generateTeam');
+  // console.log(`maxLevel: ${maxLevel}`);
   const team = [];
-  console.log(characterCount);
+  // console.log(characterCount);
   while (team.length < characterCount) {
-    console.log(team.length);
-    // team.push(1);
     team.push(...characterGenerator(allowedTypes, maxLevel));
   }
   return team;
@@ -55,9 +53,9 @@ export function generatePosition(characterList, boardSize, side) {
 //   return Array(numberCharacters).fill(posCharacter);
 // }
 
-export function* generateTheme(startTheme = 'prairie') {
+export function* generateTheme(startTheme = 0) {
   const themeList = Object.keys(themes);
-  const start = themeList.indexOf(startTheme)
+  const start = startTheme % 4;
   const len = themeList.length;
   while (true) {
     for (let i = start; i < len; i += 1) {
@@ -65,4 +63,3 @@ export function* generateTheme(startTheme = 'prairie') {
     }
   }
 }
-
