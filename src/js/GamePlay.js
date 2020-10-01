@@ -8,15 +8,15 @@ import {
 } from './utils';
 
 export default class GamePlay {
-  constructor(boardSize, side) {
+  constructor() {
+    this.container = null;
+  }
+
+  init(theme, boardSize, side) {
+    console.log('gameplay init');
     this.boardSize = boardSize;
     this.board = getBoard(boardSize);
     this.side = side;
-    this.container = null;
-    // this.init();
-  }
-
-  init(theme) {
     this.boardEl = null;
     this.cells = [];
     this.cellClickListeners = [];
@@ -42,6 +42,7 @@ export default class GamePlay {
    * @param theme
    */
   drawUi(theme) {
+    console.log('drawUi')
     this.checkBinding();
 
     this.container.innerHTML = `
@@ -136,6 +137,8 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
+    console.log('redrawPositions');
+    // console.log(positions);
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
@@ -403,8 +406,10 @@ export default class GamePlay {
   }
 
   async moveStep(element, step, time, startY, deltaY, startX, deltaX) {
-    element.style.top = `${startY + deltaY * step}px`;
-    element.style.left = `${startX + deltaX * step}px`;
+    if (element) {
+      element.style.top = `${startY + deltaY * step}px`;
+      element.style.left = `${startX + deltaX * step}px`;
+    }
     if (step < time) {
       return new Promise((resolve) => {
         setTimeout(

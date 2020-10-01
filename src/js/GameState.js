@@ -1,5 +1,4 @@
-import Character from './Character';
-import PositionedCharacter from './PositionedCharacter';
+import { getTemplatePosition } from './generators';
 
 export default class GameState {
   constructor(game, driver) {
@@ -32,6 +31,11 @@ export default class GameState {
     this.state.currentTurn = this.game.turn;
     this.state.stage = this.game.gameStage;
     this.state.timer = this.game.timer;
+    this.state.boardSize = this.game.boardSize;
+    this.state.teamSize = this.game.teamSize;
+    this.state.demo = this.game.demo;
+    this.state.side = this.game.side;
+    this.state.maxCharacterLevel = this.game.maxCharacterLevel;
     this.state.history.push({
       stage: this.game.gameStage,
       turn: this.game.turn,
@@ -44,10 +48,16 @@ export default class GameState {
   }
 
   recoverGame() {
-    this.objToPosition();
+    console.log('recoverGame');
+    this.game.boardSize = this.state.boardSize;
+    this.game.teamSize = this.state.teamSize;
+    this.game.maxCharacterLevel = this.state.maxCharacterLevel;
+    this.game.demo = this.state.demo;
+    this.game.side = this.state.side
     this.game.gameStage = this.state.stage;
     this.game.turn = this.state.currentTurn;
     this.game.timer = this.state.timer;
+    this.objToPosition();
   }
 
   saveTurn() {
@@ -72,11 +82,13 @@ export default class GameState {
   }
 
   objToPosition() {
-    const charactersNumber = Math.ceil(this.state.board.length) / 2;
-    this.game.teamSize = charactersNumber;
-    this.game.maxCharacterLevel = 1;
-    this.game.generateTeams();
+    // const charactersNumber = Math.ceil(this.state.board.length) / 2;
+    // this.game.teamSize = charactersNumber;
+    // this.game.maxCharacterLevel = 1;
+    // this.game.generateTeams();
     const { position } = this.game;
+    // console.log('getTemplatePosition');
+    // console.log(getTemplatePosition(10));
     const delta = [...position].length - this.state.board.length;
     const pass = Array(delta).fill({ position: -1, character: { health: 0 } });
     [...position].forEach((pos, i) => this.fitPosition(pos, [...this.state.board, ...pass][i]));

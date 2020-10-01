@@ -30,6 +30,7 @@ export default class Estimator {
 
   randomStrategy() {
     const availableCharacter = this.game.playerCharacterCells;
+    console.log(`availableCharacter: ${availableCharacter}`);
     let loop = true;
     while (loop) {
       const selectIndex = getRandomElement(availableCharacter);

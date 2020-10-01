@@ -13,27 +13,24 @@ import { getPropagation, changePlayers } from './utils';
 
 export default class GameController {
   constructor(gamePlay, stateService, side) {
-    this.side = side;
-    this.enemySide = changePlayers[side];
     this.gamePlay = gamePlay;
-    this.estimator = new Estimator(this);
     this.stateService = stateService;
     this.gameState = new GameState(this, stateService);
+    this.estimator = new Estimator(this);
     this.generateTheme = generateTheme();
-    this.activePosition = null;
-    if (!this.loadGame()) {
-      this.teamSize = 20;
-      this.maxCharacterLevel = 4;
-      this.gameStage = 1;
+    // this.activePosition = null;
+    console.log(this.stateService.loadStatus);
+    if (this.stateService.loadStatus) {
+      this.loadGame();
+    } else {
+      this.newGame(8, 8, 4, 'evil', false);
     }
     setInterval(() => this.timer += 1, 1000);
   }
 
   init() {
-    this.gamePlay.init(this.theme);
-    this.timer = 0;
-    this.turn = 0;
-    this.demo = true;
+    console.log('controller init');
+    this.gamePlay.init(this.theme, this.boardSize, this.side);
     this.onCellClick = this.gameState.traceAction(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
@@ -44,14 +41,20 @@ export default class GameController {
     this.gamePlay.addDemoGameListener(() => console.log('demo'));
   }
 
+  newGame(boardSize, teamSize, maxCharacterLevel, side, demo) {
+    console.log('newGame');
+    this.boardSize = boardSize;
+    this.teamSize = teamSize;
+    this.maxCharacterLevel = maxCharacterLevel;
+    this.side = side;
+    this.enemySide = changePlayers[side];
+    this.demo = demo;
+    this.gameStage = 1;
+  }
+
   loadGame() {
     console.log('loadGame');
-    console.log(this.stateService.loadStatus);
-    if (this.stateService.loadStatus) {
-      this.gameState.recoverGame();
-      return true;
-    }
-    return false;
+    this.gameState.recoverGame();
   }
 
   generateTeams() {
@@ -68,8 +71,8 @@ export default class GameController {
     );
 
     this.position = new Position([
-      ...generatePosition(this.goodTeam, this.gamePlay.boardSize, this.side),
-      ...generatePosition(this.evilTeam, this.gamePlay.boardSize, this.enemySide),
+      ...generatePosition(this.goodTeam, this.boardSize, this.side),
+      ...generatePosition(this.evilTeam, this.boardSize, this.enemySide),
     ]);
   }
 
@@ -84,12 +87,16 @@ export default class GameController {
 
   set gameStage(value) {
     console.log('gameStage');
-    if (value - this._gameStage === 1) {
-      this.generateTeams();
-    }
+    // if (value - this._gameStage === 1) {
+    //   // this.timer = 0;
+    //   // this.turn = 0;
+    // }
     this.theme = this.generateTheme.next().value;
-    this._gameStage = value;
     this.init();
+    this.generateTeams();
+    this._gameStage = value;
+    this.timer = 0;
+    this.turn = 0;
   }
 
   get gameStage() {
@@ -102,14 +109,17 @@ export default class GameController {
       [this.side, this.enemySide] = [this.enemySide, this.side];
     }
     this._turn = value;
+    console.log(this.position);
     this.position.currentTurn = this._turn;
     this.position.gameStage = this.gameStage;
     this.characterCells = this.position.getAllIndex();
     this.playerCharacterCells = this.position.getTeamPosition(this.side);
+    console.log(this.playerCharacterCells);
     this.enemyCharacterCells = this.position.getTeamPosition(this.enemySide);
     this.gamePlay.redrawPositions(this.position);
-    if (this.checkWinner()) return null;
-    if (this.side === this.estimator.side || this.demo) this.enemyAction();
+    console.log('redraw end');
+    // if (this.checkWinner()) return null;
+    // if (this.side === this.estimator.side || this.demo) this.enemyAction();
     return null;
   }
 
@@ -219,9 +229,9 @@ export default class GameController {
 
   distributionCells(index) {
     const { distance, range } = this.activePosition.character;
-    this.transitionСells = getPropagation(index, distance, this.gamePlay.boardSize)
+    this.transitionСells = getPropagation(index, distance, this.boardSize)
       .filter((element) => !this.characterCells.includes(element));
-    this.attackСells = getPropagation(index, range, this.gamePlay.boardSize)
+    this.attackСells = getPropagation(index, range, this.boardSize)
       .filter((element) => this.enemyCharacterCells.includes(element));
   }
 }

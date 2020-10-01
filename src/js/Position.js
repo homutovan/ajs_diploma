@@ -2,6 +2,7 @@ import { getTotalPropBySide, changePlayers } from './utils';
 
 export default class Position {
   constructor(positionList) {
+    console.log('constructor Position');
     this.positionList = positionList;
     this.init();
   }
@@ -47,6 +48,7 @@ export default class Position {
   }
 
   getTeamPosition(side) {
+    console.log(side);
     return this.positionList
       .map((element) => element.character.side === side && element.position)
       .filter((element) => element !== false);

@@ -1,8 +1,17 @@
 export default class GameStateService {
   constructor(storage) {
     this.storage = storage;
-    this.loadStatus = true;
+    this.loadStatus = this.checkLoadStatus();
     // this.mark = this.getTimeMark();
+  }
+
+  checkLoadStatus() {
+    try {
+      const state = JSON.parse(this.storage.getItem('state'));
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   save(state) {
