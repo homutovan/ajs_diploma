@@ -27,15 +27,20 @@ body {
   border: none;
 }
 
-.controls {
-  text-align: center;
-  margin: 50px 0;
-}
-
 .operation {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
+}
+
+.score {
+  color: white;
+  font-size: 3rem;
+}
+
+.controls {
+  text-align: center;
+  margin: 50px 0;
 }
 
 .info {
@@ -57,7 +62,8 @@ body {
 }
 
 .turn-counter,
-.game-stage {
+.game-stage,
+.game-timer {
   margin-bottom: 2rem;
   margin-left: 2rem;
   margin-right: 2rem;

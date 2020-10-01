@@ -4,6 +4,7 @@ import {
   getBoard,
   distanceMetric,
   changePlayers,
+  getTimer,
 } from './utils';
 
 export default class GamePlay {
@@ -45,12 +46,14 @@ export default class GamePlay {
 
     this.container.innerHTML = `
       <div class="operation" id="player">
+        <div class="score current-score">0</div>
         <div class="controls">
           <button data-id="action-restart" class="btn">New Game</button>
           <button data-id="action-save" class="btn">Save Game</button>
           <button data-id="action-load" class="btn">Load Game</button>
           <button data-id="action-demo" class="btn">Demo Game</button>
         </div>
+        <div class="score high-score">0</div>
       </div>
       <div class="game-info">
         <div class="turn-counter"></div>
@@ -61,19 +64,21 @@ export default class GamePlay {
         <div class="sidebar player"></div>
         <div data-id="board" class="board"id="enemy"></div>
         <div class="sidebar enemy"></div>
+        <div class="modal" id="modal-new-game"></div>
       </div>
-      <div class="modal" id="modal-new-game"></div>
     `;
 
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
     this.demoGameEl = this.container.querySelector('[data-id=action-demo]');
-    this.modal = this.container.querySelector('#modal-new-game');
+    this.modal = this.container.querySelector('.modal');
     console.log(this.modal);
     this.turnCounter = this.container.querySelector('.turn-counter');
     this.gameStage = this.container.querySelector('.game-stage');
     this.gameTimer = this.container.querySelector('.game-timer');
+    this.currentScore = this.container.querySelector('.score.current-score');
+    this.highScore = this.container.querySelector('.score.high-score');
     this.drawSidebar(this.side, 'player');
     this.drawSidebar(changePlayers[this.side], 'enemy');
 
@@ -158,6 +163,12 @@ export default class GamePlay {
     this.updateSide(statistics.evil, 'evil');
     this.turnCounter.innerText = `Turn: ${currentTurn}`;
     this.gameStage.innerText = `Stage: ${gameStage}`;
+    this.currentScore.innerText = `Score: ${0}`;
+    this.highScore.innerText = `Highscore: ${0}`;
+  }
+
+  updateTimer(timer) {
+    this.gameTimer.innerText = `Timer: ${getTimer(timer)}`;
   }
 
   updateSide(sideStats, side) {
@@ -329,7 +340,9 @@ export default class GamePlay {
       cell.appendChild(damageEl);
 
       damageEl.addEventListener('animationend', () => {
-        cell.removeChild(damageEl);
+        if (cell.contains(damageEl)) {
+          cell.removeChild(damageEl);
+        }
         resolve();
       });
     });
@@ -395,11 +408,12 @@ export default class GamePlay {
     if (step < time) {
       return new Promise((resolve) => {
         setTimeout(
-          () => resolve(this.moveStep(element, step += 1, time, startY, deltaY, startX, deltaX)), 
+          () => resolve(this.moveStep(element, step += 1, time, startY, deltaY, startX, deltaX)),
           1,
-          )
+        );
       });
     }
+    return null;
   }
 
   setCursor(cursor) {
@@ -412,9 +426,9 @@ export default class GamePlay {
     }
   }
 
-  // showModal() {
-  //   console.log('asdfa');
-  //   this.modal.style.display = 'block';
-  //   console.log(this.modal);
-  // }
+  showModal() {
+    console.log('asdfa');
+    // this.modal.style.display = 'block';
+    console.log(this.modal);
+  }
 }

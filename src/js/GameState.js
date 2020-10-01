@@ -20,16 +20,7 @@ export default class GameState {
   traceAction(trackedFunction) {
     return async (arg) => {
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
-        this.state.currentTurn = this.game.turn;
-        this.state.stage = this.game.gameStage;
-        this.state.history.push({
-          stage: this.game.gameStage,
-          turn: this.game.turn,
-          side: this.game.side,
-          action: this.game.action.name,
-          from: this.game.activePosition.position,
-          to: arg,
-        });
+        this.fixHistory(arg);
         await trackedFunction.call(this.game, arg);
         this.saveTurn();
         this.game.turn += 1;
@@ -37,10 +28,26 @@ export default class GameState {
     };
   }
 
-  recoverTurn() {
-    this.objToPosition(this.game.position);
-    // this.game.gameStage = this.state.stage;
+  fixHistory(arg) {
+    this.state.currentTurn = this.game.turn;
+    this.state.stage = this.game.gameStage;
+    this.state.timer = this.game.timer;
+    this.state.history.push({
+      stage: this.game.gameStage,
+      turn: this.game.turn,
+      timer: this.game.timer,
+      side: this.game.side,
+      action: this.game.action.name,
+      from: this.game.activePosition.position,
+      to: arg,
+    });
+  }
+
+  recoverGame() {
+    this.objToPosition();
+    this.game.gameStage = this.state.stage;
     this.game.turn = this.state.currentTurn;
+    this.game.timer = this.state.timer;
   }
 
   saveTurn() {
@@ -64,7 +71,12 @@ export default class GameState {
     return obj;
   }
 
-  objToPosition(position) {
+  objToPosition() {
+    const charactersNumber = Math.ceil(this.state.board.length) / 2;
+    this.game.teamSize = charactersNumber;
+    this.game.maxCharacterLevel = 1;
+    this.game.generateTeams();
+    const { position } = this.game;
     const delta = [...position].length - this.state.board.length;
     const pass = Array(delta).fill({ position: -1, character: { health: 0 } });
     [...position].forEach((pos, i) => this.fitPosition(pos, [...this.state.board, ...pass][i]));

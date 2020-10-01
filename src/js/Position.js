@@ -68,6 +68,7 @@ export default class Position {
     this.statistics = {
       currentTurn: this.currentTurn,
       gameStage: this.gameStage,
+      timer: this.timer,
     };
     for (const side in changePlayers) {
       if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {

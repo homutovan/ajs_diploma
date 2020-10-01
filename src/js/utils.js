@@ -47,3 +47,12 @@ export function getTotalPropBySide(list, side, prop) {
   return list.filter((element) => element.character.side === side)
     .reduce((acc, element) => acc + element.character[prop], 0);
 }
+
+export function getTimer(count) {
+  return (new Date(0, 0, 0, 0, 0, count)).toLocaleString(
+    'ru', {
+      minute: 'numeric',
+      second: 'numeric',
+    },
+  );
+}
