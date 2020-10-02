@@ -348,7 +348,7 @@ body {
 }
 
 .modal {
-  position: absolute;
+  position: fixed;
   background-color: black;
   opacity: 0.3;
   top: 0;
