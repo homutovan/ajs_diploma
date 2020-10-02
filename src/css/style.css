@@ -349,8 +349,10 @@ body {
 
 .modal {
   position: fixed;
-  background-color: black;
-  opacity: 0.3;
+  /* background-color: black; */
+  background: rgba(0,0,0,0.7);
+  /* opacity: 1; */
+  /* opacity: 0.3; */
   top: 0;
   bottom: 0;
   left: 0;
@@ -365,27 +367,90 @@ body {
 }
 
 .modal-dialog {
-  background-color: #d79765;
+  position: relative;
+  margin: 30px auto;
+  /* background-color: #d79765; */
   width: 25%;
-  border-radius: 5%;
   height: 500px;
   color: white;
   opacity: 1;
 }
 
-.modal-header {
-  margin-top: 2%;
-  margin-left: 2%;
-}
-
-.close {
-  border-radius: 50%;
-}
-
-.modal-title {
+.modal-content {
+  position: relative;
+  padding: 1rem;
+  background-image: url('../img/mountain/map-tile-center.png');
+  border: 1px solid #999;
+  border-radius: 1rem;
   font-size: 2rem;
+  -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
+  box-shadow: 0 3px 9px rgba(0,0,0,.5);
 }
 
-/* .form {
-  opacity: 1;
+/* .modal-title {
+  font-size: 2rem;
 } */
+
+.form-group {
+  display: flex;
+  margin-bottom: 2rem;
+}
+
+.params-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.horm-header {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: rebeccapurple;
+}
+
+label {
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  padding-left: 3rem;
+  margin-right: 15px;
+  font-size: 2rem;
+  }
+
+input {
+  cursor: pointer;
+}
+
+input[type=range] {
+  width: 100%
+}
+
+input[type=radio] {
+  display: none;
+}
+
+label:before {
+  content: "";
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  margin-right: 10px;
+  position: absolute;
+  left: 0;
+  bottom: 1px;
+  background-color: #aaa;
+  box-shadow: inset 0px 2px 3px 0px rgba(0, 0, 0, .3), 0px 1px 0px 0px rgba(255, 255, 255, .8);
+}
+
+input[type=radio]:checked + label:before {
+  content: "";
+  background-image: url('../img/characters/undead.png');
+  background-position: center;
+  background-size: contain;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+}

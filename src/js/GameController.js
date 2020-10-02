@@ -12,7 +12,7 @@ import {
 import { getPropagation, changePlayers } from './utils';
 
 export default class GameController {
-  constructor(gamePlay, stateService, side) {
+  constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
     this.gameState = new GameState(this, stateService);
@@ -29,14 +29,16 @@ export default class GameController {
   init() {
     // console.log('controller init');
     this.gamePlay.init(this.theme, this.boardSize, this.initialSide);
+    this.gamePlay.stateService = this.stateService;
+    this.gamePlay.startGame = this.newGame.bind(this);
     this.onCellClick = this.gameState.traceAction(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    this.gamePlay.addNewGameListener(this.gamePlay.showModal.bind(this.gamePlay));
-    this.gamePlay.addSaveGameListener(() => console.log('save'));
-    this.gamePlay.addLoadGameListener(() => console.log('load'));
-    this.gamePlay.addDemoGameListener(() => console.log('demo'));
+    this.gamePlay.addNewGameListener(() => this.gamePlay.showModal('newGame'));
+    this.gamePlay.addSaveGameListener(() => this.gamePlay.showModal('saveGame'));
+    this.gamePlay.addLoadGameListener(() => this.gamePlay.showModal('loadGame'));
+    this.gamePlay.addDemoGameListener(() => this.newGame(16, 32, 12, 'evil', true));
   }
 
   newGame(boardSize, teamSize, maxCharacterLevel, side, demo) {
@@ -58,20 +60,19 @@ export default class GameController {
 
   generateTeams() {
     console.log('generateTeams');
-    this.evilTeam = generateTeam(
+    this.goodTeam = generateTeam(
       typeList.slice(0, typeList.length / 2),
       this.maxCharacterLevel,
       this.teamSize,
     );
-    this.goodTeam = generateTeam(
+    this.evilTeam = generateTeam(
       typeList.slice(typeList.length / 2),
       this.maxCharacterLevel,
       this.teamSize,
     );
-
     this.team = new Team([
-      ...generatePosition(this.goodTeam, this.boardSize, this.side),
-      ...generatePosition(this.evilTeam, this.boardSize, this.enemySide),
+      ...generatePosition(this.goodTeam, this.boardSize, this.initialSide === 'good'),
+      ...generatePosition(this.evilTeam, this.boardSize, this.initialSide === 'evil'),
     ]);
   }
 

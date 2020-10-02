@@ -34,16 +34,18 @@ export function generateTeam(allowedTypes, maxLevel, characterCount) {
   return team;
 }
 
-export function generatePosition(characterList, boardSize, side) {
+export function generatePosition(characterList, boardSize, location) {
   console.log('generatePosition');
-  const restrictor = (_, i) => side === 'evil' ? i * boardSize : i * boardSize + boardSize - 2;
+  // console.log(`boardSize: ${boardSize}`);
+  // console.log(location);
+  const restrictor = (_, i) => location ? i * boardSize : i * boardSize + boardSize - 2;
   const vertLine = Array(boardSize).fill('').map(restrictor);
+  console.log(vertLine);
   const availablePosition = [...vertLine, ...vertLine.map((el) => el + 1)];
-  const position = [];
-  while (position.length < characterList.length) {
-    const point = availablePosition[Math.floor(Math.random() * boardSize * 2)];
-    if (!position.includes(point)) position.push(point);
-  }
+  console.log(availablePosition);
+  const position = availablePosition.sort(() => Math.random() - 0.5).slice(0, characterList.length);
+  console.log(position);
+  console.log(characterList);
   return characterList.map((character, i) => new PositionedCharacter(character, position[i]));
 }
 

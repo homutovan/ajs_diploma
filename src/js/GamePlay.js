@@ -7,6 +7,8 @@ import {
   getTimer,
 } from './utils';
 
+import formSelector from './forms';
+
 export default class GamePlay {
   constructor() {
     this.container = null;
@@ -25,7 +27,7 @@ export default class GamePlay {
     this.newGameListeners = [];
     this.saveGameListeners = [];
     this.loadGameListeners = [];
-    this.demoGameListeners =[];
+    this.demoGameListeners = [];
     this.drawUi(theme);
   }
 
@@ -42,47 +44,22 @@ export default class GamePlay {
    * @param theme
    */
   drawUi(theme) {
-    console.log('drawUi')
+    console.log('drawUi');
     this.checkBinding();
-
-    this.container.innerHTML = `
-      <div class="operation" id="player">
-        <div class="score current-score">0</div>
-        <div class="controls">
-          <button data-id="action-restart" class="btn">New Game</button>
-          <button data-id="action-save" class="btn">Save Game</button>
-          <button data-id="action-load" class="btn">Load Game</button>
-          <button data-id="action-demo" class="btn">Demo Game</button>
-        </div>
-        <div class="score high-score">0</div>
-      </div>
-      <div class="game-info">
-        <div class="turn-counter"></div>
-        <div class="game-stage"></div>
-        <div class="game-timer"></div>
-      </div>
-      <div class="board-container">
-        <div class="sidebar player"></div>
-        <div data-id="board" class="board"id="enemy"></div>
-        <div class="sidebar enemy"></div>
-        <div class="modal" id="modal-new-game"></div>
-      </div>
-    `;
-
+    this.container.innerHTML = formSelector('main');
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
     this.demoGameEl = this.container.querySelector('[data-id=action-demo]');
     this.modal = this.container.querySelector('.modal');
-    console.log(this.modal);
     this.turnCounter = this.container.querySelector('.turn-counter');
     this.gameStage = this.container.querySelector('.game-stage');
     this.gameTimer = this.container.querySelector('.game-timer');
     this.currentScore = this.container.querySelector('.score.current-score');
     this.highScore = this.container.querySelector('.score.high-score');
+
     this.drawSidebar(this.side, 'player');
     this.drawSidebar(changePlayers[this.side], 'enemy');
-
     this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
     this.loadGameEl.addEventListener('click', (event) => this.onLoadGameClick(event));
@@ -100,7 +77,6 @@ export default class GamePlay {
       cellEl.addEventListener('click', (event) => this.onCellClick(event));
       this.boardEl.appendChild(cellEl);
     }
-
     this.cells = Array.from(this.boardEl.children);
   }
 
@@ -125,10 +101,6 @@ export default class GamePlay {
     element.classList.add(...cssClass.split(' '));
     parent.appendChild(element);
     return element;
-  }
-
-  drawModal() {
-
   }
 
   /**
@@ -245,8 +217,8 @@ export default class GamePlay {
     this.loadGameListeners.push(callback);
   }
 
-    /**
-   * Add listener to "Load Game" button click
+  /**
+   * Add listener to "Demo Game" button click
    *
    * @param callback
    */
@@ -292,8 +264,6 @@ export default class GamePlay {
   }
 
   showError(message) {
-    // console.log(this.cellClickListeners);
-    // console.log(message);
     alert(message);
   }
 
@@ -385,7 +355,14 @@ export default class GamePlay {
   async showAttack(cellFrom, startX, startY, stopX, stopY, toW, toH, distance, side) {
     const color = side === 'evil' ? 'red' : 'blue';
     if (distance > 1) {
-      await this.showDistanceAttack(cellFrom, startX, startY, stopX + toW / 2, stopY + toH / 2, color);
+      await this.showDistanceAttack(
+        cellFrom,
+        startX,
+        startY,
+        stopX + toW / 2,
+        stopY + toH / 2,
+        color,
+      );
     } else {
       await this.showHandToHandAttack(cellFrom, 0, 0, stopX, stopY);
     }
@@ -441,7 +418,68 @@ export default class GamePlay {
     }
   }
 
-  showModal() {
+  showModal(mode) {
     this.modal.style.display = 'block';
+    this.createForm(formSelector(mode));
+    this.registerEvents();
+  }
+
+  closeModal() {
+    this.modal.style.display = 'none';
+    this.unregisterEvents();
+  }
+
+  unregisterEvents() {
+    this.dismiss.onclick = '';
+    this.form.onsubmit = '';
+    if (this.boardSizeControl) {
+      this.boardSizeControl.onchange = '';
+      this.teamSizeControl.onchange = '';
+      this.boardSizeControl = '';
+      this.teamSizeControl = '';
+      this.boardSizeIndicator = '';
+      this.teamSizeIndicator = '';
+    }
+  }
+
+  registerEvents() {
+    this.form = this.modal.querySelector('#game-params-form');
+    this.dismiss = this.modal.querySelector('button[data-dismiss="modal"]');
+    this.boardSizeControl = this.modal.querySelector('#board-size-control');
+    this.teamSizeControl = this.modal.querySelector('#team-size-control');
+    this.boardSizeIndicator = this.modal.querySelector('.board-size');
+    this.teamSizeIndicator = this.modal.querySelector('.team-size');
+    this.dismiss.onclick = this.closeModal.bind(this);
+    if (this.boardSizeControl) {
+      this.boardSizeControl.onchange = this.showBoardSize.bind(this);
+      this.teamSizeControl.onchange = this.showTeamSize.bind(this);
+      this.form.onsubmit = this.newGame.bind(this);
+    }
+  }
+
+  newGame(event) {
+    event.preventDefault();
+    const data = new FormData(this.form);
+    const selectSide = data.get('side');
+    const selectBoardSize = +data.get('boardSize');
+    const selectTeamSize = +data.get('teamSize');
+    this.startGame(selectBoardSize, selectTeamSize, 4, selectSide, false);
+    this.closeModal();
+  }
+
+  showBoardSize(event) {
+    const { value } = event.target;
+    this.boardSizeIndicator.innerText = value;
+    this.teamSizeControl.max = 2 * value;
+    this.teamSizeIndicator.innerText = this.teamSizeControl.value;
+  }
+
+  showTeamSize(event) {
+    const { value } = event.target;
+    this.teamSizeIndicator.innerText = value;
+  }
+
+  createForm(form) {
+    this.modal.innerHTML = form;
   }
 }
