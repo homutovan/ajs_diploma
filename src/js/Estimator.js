@@ -6,8 +6,10 @@ export default class Estimator {
     this.side = this.game.enemySide;
   }
 
-  async requestStrategy() {
-    await this.randomStrategy();
+  requestStrategy() {
+    console.log('request');
+    this.randomStrategy();
+    return null;
     // if (this.side === this.game.side) {
     //   console.log('random action');
     //   this.randomStrategy();

@@ -8,9 +8,9 @@ export default class GameState {
     this.init();
   }
 
-  init() {
+  init(name = 'autosave') {
     try {
-      this.state = this.driver.load();
+      this.state = this.driver.load(name);
     } catch (e) {
       // console.log(e);
       this.state = { history: [] };
@@ -19,6 +19,7 @@ export default class GameState {
 
   traceAction(trackedFunction) {
     return async (arg) => {
+      console.log('traceAction');
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
         this.fixHistory(arg);
         await trackedFunction.call(this.game, arg);
@@ -40,7 +41,10 @@ export default class GameState {
     this.state.initTotalHealth = this.game.team.initTotalHealth;
     // this.state.teamSize = this.game.team.teamSize;
     // this.state.statistics = this.game.team.statistics;
-    this.state.maxCharacterLevel = this.game.maxCharacterLevel;
+    // this.state.maxCharacterLevel = this.game.maxCharacterLevel;
+    if (this.state.history.length > 10) {
+      this.state.history.shift();
+    }
     this.state.history.push({
       stage: this.game.gameStage,
       turn: this.game.turn,
@@ -52,12 +56,15 @@ export default class GameState {
     });
   }
 
-  recoverGame() {
+  recoverGame(name) {
     console.log('recoverGame');
+    if (name !== 'autosave') {
+      this.init(name);
+    }
+    this.game.demo = this.state.demo;
     this.game.boardSize = this.state.boardSize;
     this.game.teamSize = this.state.teamSize;
-    this.game.maxCharacterLevel = this.state.maxCharacterLevel;
-    this.game.demo = this.state.demo;
+    this.game.maxCharacterLevel = 1;// this.state.maxCharacterLevel;
     this.game.initialSide = this.state.initialSide;
     this.game.side = this.state.side;
     this.game.generateTheme = generateTheme(this.state.stage - 1);
@@ -67,10 +74,10 @@ export default class GameState {
     this.game.turn = this.state.currentTurn + 1;
   }
 
-  saveTurn() {
+  saveTurn(name = 'auto') {
     this.state.board = [...this.game.team]
       .map((position) => this.teamToObj(position));
-    this.driver.save(this.state);
+    this.driver.save(this.state, name);
   }
 
   getLastTurn() {

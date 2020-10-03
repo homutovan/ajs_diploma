@@ -417,7 +417,8 @@ label {
   font-size: 2rem;
   }
 
-input {
+input,
+button {
   cursor: pointer;
 }
 
@@ -453,4 +454,39 @@ input[type=radio]:checked + label:before {
 .form-footer {
   display: flex;
   justify-content: space-between;
+}
+
+.save-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.save-input,
+.load-container {
+  font-size: 2rem;
+  width: 65%;
+}
+
+.save {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.save:hover {
+  outline: solid white 1px;
+}
+
+.delete {
+  border: solid white 2px;
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  border-radius: 50%;
+  text-align: center;
+}
+
+.delete:hover {
+  transform: scale(1.2);
+  opacity: 0.5;
 }

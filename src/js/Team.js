@@ -2,7 +2,6 @@ import { getTotalPropBySide, changePlayers } from './utils';
 
 export default class Team {
   constructor(positionList) {
-    // console.log('constructor Position');
     this.positionList = positionList;
     this.init();
   }
@@ -38,6 +37,11 @@ export default class Team {
       .filter((element) => element !== false);
   }
 
+  getCharacters() {
+    return this.positionList
+      .map((element) => element.character);
+  }
+
   getAllIndex() {
     return [...this.getTeamPosition('good'), ...this.getTeamPosition('evil')];
   }
@@ -48,6 +52,11 @@ export default class Team {
 
   getTotalHealth(side) {
     return getTotalPropBySide(this.positionList, side, 'health');
+  }
+
+  totalLevelUp() {
+    this.positionList
+      .forEach((element) => element.character.levelUp());
   }
 
   calcStatistics() {

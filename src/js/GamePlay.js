@@ -6,7 +6,8 @@ import {
   changePlayers,
   getTimer,
 } from './utils';
-
+ 
+import cursors from './cursors';
 import formSelector from './forms';
 
 export default class GamePlay {
@@ -82,21 +83,21 @@ export default class GamePlay {
 
   drawSidebar(side, player) {
     this.sidebarEl = this.container.querySelector(`.sidebar.${player}`);
-    this.addElement(this.sidebarEl, 'title side-title', side);
-    this.addElement(this.sidebarEl, 'title stat-title', 'number of characters');
-    this[`characterNumber${side}`] = this.addElement(this.sidebarEl, `${side} stats title number-of-characters`, '');
-    this.addElement(this.sidebarEl, 'title stat-title', 'total health');
-    this[`totalHealth${side}`] = this.addElement(this.sidebarEl, `${side} stats title total-health`, '');
-    this.addElement(this.sidebarEl, 'title stat-title', 'total damage');
-    this[`totalDamage${side}`] = this.addElement(this.sidebarEl, `${side} stats title total-damage`, '');
-    this.addElement(this.sidebarEl, 'title stat-title', 'characters killed');
-    this[`charactersKilled${side}`] = this.addElement(this.sidebarEl, `${side} stats title characters-killed`, '');
-    this.addElement(this.sidebarEl, 'title stat-title', 'enemies killed');
-    this[`enemiesKilled${side}`] = this.addElement(this.sidebarEl, `${side} stats title enemies-killed`, '');
+    this.addElement(this.sidebarEl, 'div', 'title side-title', side);
+    this.addElement(this.sidebarEl, 'div', 'title stat-title', 'number of characters');
+    this[`characterNumber${side}`] = this.addElement(this.sidebarEl, 'div', `${side} stats title number-of-characters`, '');
+    this.addElement(this.sidebarEl, 'div', 'title stat-title', 'total health');
+    this[`totalHealth${side}`] = this.addElement(this.sidebarEl, 'div', `${side} stats title total-health`, '');
+    this.addElement(this.sidebarEl, 'div', 'title stat-title', 'total damage');
+    this[`totalDamage${side}`] = this.addElement(this.sidebarEl, 'div', `${side} stats title total-damage`, '');
+    this.addElement(this.sidebarEl, 'div', 'title stat-title', 'characters killed');
+    this[`charactersKilled${side}`] = this.addElement(this.sidebarEl, 'div', `${side} stats title characters-killed`, '');
+    this.addElement(this.sidebarEl, 'div', 'title stat-title', 'enemies killed');
+    this[`enemiesKilled${side}`] = this.addElement(this.sidebarEl, 'div', `${side} stats title enemies-killed`, '');
   }
 
-  addElement(parent, cssClass, text) {
-    const element = document.createElement('div');
+  addElement(parent, tag, cssClass, text) {
+    const element = document.createElement(tag);
     element.innerText = text;
     element.classList.add(...cssClass.split(' '));
     parent.appendChild(element);
@@ -409,7 +410,7 @@ export default class GamePlay {
   }
 
   setCursor(cursor) {
-    this.boardEl.style.cursor = cursor;
+    this.boardEl.style.cursor = cursors[cursor];
   }
 
   checkBinding() {
@@ -419,14 +420,19 @@ export default class GamePlay {
   }
 
   showModal(mode) {
+    this.game.gamePause();
+    this.game.demo = false;
     this.modal.style.display = 'block';
+    // console.log(`saveCont: ${this.saveContainer}`);
     this.createForm(formSelector(mode));
     this.registerEvents();
   }
 
   closeModal() {
+    console.log(this.demoState);
     this.modal.style.display = 'none';
     this.unregisterEvents();
+    this.game.gameRun();
   }
 
   unregisterEvents() {
@@ -446,25 +452,48 @@ export default class GamePlay {
     this.form = this.modal.querySelector('#game-params-form');
     this.dismiss = this.modal.querySelector('button[data-dismiss="modal"]');
     this.boardSizeControl = this.modal.querySelector('#board-size-control');
+    // console.log(`this.boardSizeControl: ${this.boardSizeControl}`);
     this.teamSizeControl = this.modal.querySelector('#team-size-control');
     this.boardSizeIndicator = this.modal.querySelector('.board-size');
     this.teamSizeIndicator = this.modal.querySelector('.team-size');
+    // console.log(`this.saveContainer: ${this.saveContainer}`);
     this.dismiss.onclick = this.closeModal.bind(this);
     if (this.boardSizeControl) {
       this.boardSizeControl.onchange = this.showBoardSize.bind(this);
       this.teamSizeControl.onchange = this.showTeamSize.bind(this);
       this.form.onsubmit = this.newGame.bind(this);
+    } else if (this.saveContainer) {
+      this.form.onsubmit = this.saveGame.bind(this);
+    } else if (this.loadContainer) {
+      this.form.onsubmit = this.loadGame.bind(this);
     }
   }
 
-  newGame(event) {
+  eventHandler(event) {
     event.preventDefault();
-    const data = new FormData(this.form);
+    return new FormData(this.form);
+  }
+
+  newGame(event) {
+    const data = this.eventHandler(event);
     const selectSide = data.get('side');
     const selectBoardSize = +data.get('boardSize');
     const selectTeamSize = +data.get('teamSize');
     this.startGame(selectBoardSize, selectTeamSize, 4, selectSide, false);
+    // this.closeModal();
+  }
+
+  saveGame(event) {
+    const data = this.eventHandler(event);
+    const name = data.get('save-input');
+    this.writeGame(name);
     this.closeModal();
+  }
+
+  loadGame(event) {
+    const data = this.eventHandler(event);
+    const name = data.get('load-input');
+    this.readGame(name);
   }
 
   showBoardSize(event) {
@@ -481,5 +510,45 @@ export default class GamePlay {
 
   createForm(form) {
     this.modal.innerHTML = form;
+    // console.log(this.saveContainer);
+    this.saveContainer = this.modal.querySelector('.save-container');
+    this.loadContainer = this.modal.querySelector('.load-container');
+    if (this.saveContainer) {
+      this.fillSave(this.saveContainer);
+    } else if (this.loadContainer) {
+      this.fillLoad(this.loadContainer);
+    }
+  }
+
+  fillSave(saveContainer) {
+    saveContainer.innerHTML = '';
+    const saveList = this.stateService.getSaveList();
+    for (const save of saveList) {
+      const element = this.addElement(saveContainer, 'li', 'save-list-item', '');
+      const inner = this.addElement(element, 'div', `save ${save}`, '');
+      const saveNameEl = this.addElement(inner, 'div', 'save-name', save);
+      const delElement = this.addElement(inner, 'div', 'delete', 'X');
+      delElement.addEventListener('click', (event) => {
+        const keyName = event.target.parentNode.classList[1];
+        this.stateService.delete(keyName);
+        this.fillSave(saveContainer);
+      });
+    }
+  }
+
+  fillLoad(loadContainer) {
+    loadContainer.innerHTML = '';
+    const saveList = this.stateService.getSaveList();
+    for (const save of saveList) {
+      const element = this.addElement(loadContainer, 'option', 'load-list-item', save);
+      // const inner = this.addElement(element, 'div', `save ${save}`, '');
+      // const saveNameEl = this.addElement(inner, 'div', 'save-name', save);
+      // const delElement = this.addElement(inner, 'div', 'delete', 'X');
+      // delElement.addEventListener('click', (event) => {
+      //   const keyName = event.target.parentNode.classList[1];
+      //   this.stateService.delete(keyName);
+      //   this.fillSave(loadContainer);
+      // });
+    }
   }
 }

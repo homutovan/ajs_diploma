@@ -18,7 +18,7 @@ const mainForm = `
     <div class="sidebar player"></div>
     <div data-id="board" class="board"id="enemy"></div>
     <div class="sidebar enemy"></div>
-    <div class="modal"</div>
+    <div class="modal"></div>
   </div>
   `;
 const newGameForm = `
@@ -47,8 +47,8 @@ const newGameForm = `
                   <input type="range" class="form-control" id="team-size-control" name="teamSize" min="2" max="16" value="2" step="1">
                 </div>
                 <div class="form-footer">
-                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Закрыть</button>
-                  <button type="submit" class="btn btn-primary" form="game-params-form">Играть</button>
+                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary" form="game-params-form">New Game</button>
                 </div>
               </form>
             </div>
@@ -58,57 +58,35 @@ const loadGameForm = `
           <div class="modal-dialog">
             <div class="modal-content">
               <form class="form" id="game-params-form">
-                <div class="horm-header">Выбрать сторону</div>
-                <div class="form-group">
-                  <input type="radio" class="form-control side" name="side" id="good" value="good" checked>
-                  <label for="good">Good</label>
-                  <input type="radio" class="form-control side" name="side" id="evil" value="evil">
-                  <label for="evil">Evil</label>
-                </div>
-                <div class="params-container">
-                  <div class="horm-header">Размер игрового поля</div>
-                  <div class="board-size">8</div>
-                </div>
-                <div class="form-group">
-                  <input type="range" class="form-control" id="board-size-control" name="boardSize" min="6" max="16" value="8" step="1">
-                </div>
-                <div class="params-container">
-                  <div class="horm-header">Количество персонажей в команде</div>
-                  <div class="team-size">2</div>
-                </div>
-                <div class="form-group">
-                  <input type="range" class="form-control" id="team-size-control" name="teamSize" min="2" max="16" value="2" step="1">
-                </div>
-                <div class="form-footer">
-                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Закрыть</button>
-                  <button type="submit" class="btn btn-primary" form="game-params-form">Играть</button>
-                </div>
+                <div class="horm-header">Загрузить сохраненную игру</div>
+                <div class="save-name">
+                  <select class="load-container" name="load-input"></select>
+                  <button type="submit" class="btn btn-primary" form="game-params-form">Load</button>
+                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
               </form>
             </div>
-        </div>`;
+          </div>`;
 
 const saveGameForm = `
           <div class="modal-dialog">
             <div class="modal-content">
               <form class="form" id="game-params-form">
                 <div class="horm-header">Сохранить игру</div>
-                <div class="form-footer">
-                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Закрыть</button>
-                  <button type="submit" class="btn btn-primary" form="game-params-form">Играть</button>
-                </div>
+                <h4>Save Game List</h4>
+                <ol class="save-container"></ol>
+                <div class="save-name">
+                  <input type="text" class="save-input" name="save-input" placeholder="Enter save name..." required>
+                  <button type="submit" class="btn btn-primary" form="game-params-form">Save</button>
+                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
               </form>
             </div>
         </div>`;
 
 export default function formSelector(formName) {
-  console.log('selector');
-  const form = {
+  return {
     main: mainForm,
     newGame: newGameForm,
     saveGame: saveGameForm,
     loadGame: loadGameForm,
-  };
-  // console.log(formName);
-  // console.log(form[formName]);
-  return form[formName];
+  }[formName];
 }

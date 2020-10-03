@@ -1,28 +1,33 @@
 export default class GameStateService {
   constructor(storage) {
     this.storage = storage;
-    this.loadStatus = this.checkLoadStatus();
+    // this.loadStatus = this.checkLoadStatus();
     // this.mark = this.getTimeMark();
   }
 
-  checkLoadStatus() {
-    try {
-      const state = JSON.parse(this.storage.getItem('state'));
-      return true;
-    } catch (e) {
-      return false;
-    }
+  // checkLoadStatus() {
+  //   try {
+  //     const state = JSON.parse(this.storage.getItem('autosave'));
+  //     return true;
+  //   } catch (e) {
+  //     return false;
+  //   }
+  // }
+
+  save(state, name) {
+    this.storage.setItem(`${name}save`, JSON.stringify(state));
   }
 
-  save(state) {
-    this.storage.setItem('state', JSON.stringify(state));
+  delete(name) {
+    this.storage.removeItem(name);
   }
 
-  load() {
+  load(name) {
     try {
-      const state = JSON.parse(this.storage.getItem('state'));
-      this.getSaveList();
+      const state = JSON.parse(this.storage.getItem(name));
+      // this.getSaveList();
       if (!state) throw new Error('Invalid state');
+      this.loadStatus = true;
       return state;
     } catch (e) {
       this.loadStatus = false;
@@ -34,7 +39,10 @@ export default class GameStateService {
     const saveList = [];
     const len = this.storage.length;
     for (let i = 0; i < len; i += 1) {
-      saveList.push(this.storage.key(i));
+      const key = this.storage.key(i);
+      if (key.endsWith('save')) {
+        saveList.push(key);
+      }
     }
     return saveList;
   }
