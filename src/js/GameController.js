@@ -15,11 +15,13 @@ export default class GameController {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
     this.gameState = new GameState(this, stateService);
+    this.highscore = this.gameState.highscore || 0;
     this.estimator = new Estimator(this);
+    this.saveTeam = [];
     if (this.stateService.loadStatus) {
       this.loadGame();
     } else {
-      this.newGame(8, 8, 4, 'evil', false);
+      this.newGame(16, 32, 12, 'evil', true);
     }
   }
 
@@ -45,13 +47,14 @@ export default class GameController {
   newGame(boardSize, teamSize, maxCharacterLevel, side, demo) {
     console.log('newGame');
     this.demo = demo;
+    this.score = 0;
+    this.saveTeam = [];
     this.boardSize = boardSize;
     this.teamSize = teamSize;
     this.maxCharacterLevel = maxCharacterLevel;
     this.initialSide = side;
     this.side = side;
     this.generateTheme = generateTheme();
-    this.saveTeam = [];
     this.gameStage = 1;
     console.log('end new game');
   }
@@ -66,6 +69,7 @@ export default class GameController {
   }
 
   generateTeams() {
+    console.log(this.saveTeam);
     this.playerTeam = generateTeam(
       typeList,
       this.maxCharacterLevel,
@@ -148,6 +152,8 @@ export default class GameController {
     // console.log(this.team);
     this.team.currentTurn = this._turn;
     this.team.gameStage = this.gameStage;
+    this.team.score = this.score;
+    this.team.highscore = this.highscore;
     // this.characterCells = this.team.getAllIndex();
     this.playerCharacterCells = this.team.getTeamPosition(this.side);
     // console.log(this.side);
@@ -175,6 +181,7 @@ export default class GameController {
     if (!this.playerCharacterCells.length * this.enemyCharacterCells.length) {
       const winner = this.team.getPositionByIndex(this.characterCells[0]).character.side;
       console.log(winner);
+      this.score += this.team.getTotalHealth(winner);
       this.team.totalLevelUp();
       this.saveTeam = this.team.getCharacters();
       this.gameStage += 1;

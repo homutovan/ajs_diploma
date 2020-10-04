@@ -39,7 +39,7 @@ export function generatePosition(characterList, boardSize, playerSide) {
   const location = characterList[0].side === playerSide;
   const restrictor = (_, i) => (location ? (i * boardSize) : (i * boardSize + boardSize - 2));
   const vertLine = Array(boardSize).fill('').map(restrictor);
-  const availablePosition = [...vertLine, ...vertLine.map((el) => el + 1)];
+  const availablePosition = [...vertLine, ...vertLine.map((el) => el + 1)]; /// подумать над механизмом расширения полосы
   const position = availablePosition.sort(() => Math.random() - 0.5).slice(0, characterList.length);
   return characterList.map((character, i) => new PositionedCharacter(character, position[i]));
 }

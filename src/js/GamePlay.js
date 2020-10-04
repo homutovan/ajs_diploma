@@ -136,13 +136,19 @@ export default class GamePlay {
   }
 
   updateStatistics(statistics) {
-    const { currentTurn, gameStage } = statistics;
+    console.log(statistics);
+    const {
+      currentTurn,
+      gameStage,
+      score,
+      highscore,
+    } = statistics;
     this.updateSide(statistics.good, 'good');
     this.updateSide(statistics.evil, 'evil');
     this.turnCounter.innerText = `Turn: ${currentTurn}`;
     this.gameStage.innerText = `Stage: ${gameStage}`;
-    this.currentScore.innerText = `Score: ${0}`;
-    this.highScore.innerText = `Highscore: ${0}`;
+    this.currentScore.innerText = `Score: ${score}`;
+    this.highScore.innerText = `Highscore: ${highscore}`;
   }
 
   updateTimer(timer) {

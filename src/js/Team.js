@@ -63,7 +63,8 @@ export default class Team {
     this.statistics = {
       currentTurn: this.currentTurn,
       gameStage: this.gameStage,
-      timer: this.timer,
+      score: this.score,
+      highscore: this.highscore,
     };
     for (const side in changePlayers) {
       if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {

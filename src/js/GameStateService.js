@@ -18,6 +18,14 @@ export default class GameStateService {
     this.storage.setItem(`${name}save`, JSON.stringify(state));
   }
 
+  set highscore(value) {
+    this.storage.setItem('highscore', JSON.stringify(value));
+  }
+
+  get highscore() {
+    return JSON.parse(this.storage.getItem('highscore'));
+  }
+
   delete(name) {
     this.storage.removeItem(name);
   }

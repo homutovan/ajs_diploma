@@ -5,6 +5,7 @@ export default class GameState {
   constructor(game, driver) {
     this.game = game;
     this.driver = driver;
+    this.highscore = this.driver.highscore;
     this.init();
   }
 
@@ -33,15 +34,13 @@ export default class GameState {
     this.state.currentTurn = this.game.turn;
     this.state.stage = this.game.gameStage;
     this.state.timer = this.game.timer;
+    this.state.score = this.game.score;
     this.state.boardSize = this.game.boardSize;
-    this.state.teamSize = this.game.teamSize;
+    this.state.teamSize = this.game.team.teamSize;
+    this.state.initTotalHealth = this.game.team.initTotalHealth;
     this.state.demo = this.game.demo;
     this.state.initialSide = this.game.initialSide;
     this.state.side = changePlayers[this.game.side];
-    this.state.initTotalHealth = this.game.team.initTotalHealth;
-    // this.state.teamSize = this.game.team.teamSize;
-    // this.state.statistics = this.game.team.statistics;
-    // this.state.maxCharacterLevel = this.game.maxCharacterLevel;
     if (this.state.history.length > 10) {
       this.state.history.shift();
     }
@@ -62,9 +61,10 @@ export default class GameState {
       this.init(name);
     }
     this.game.demo = this.state.demo;
+    this.game.score = this.state.score;
     this.game.boardSize = this.state.boardSize;
-    this.game.teamSize = this.state.teamSize;
-    this.game.maxCharacterLevel = 1;// this.state.maxCharacterLevel;
+    this.game.teamSize = Math.ceil(this.state.board.length / 2);
+    this.game.maxCharacterLevel = 1;
     this.game.initialSide = this.state.initialSide;
     this.game.side = this.state.side;
     this.game.generateTheme = generateTheme(this.state.stage - 1);
@@ -96,21 +96,16 @@ export default class GameState {
   }
 
   objToTeam() {
-    // const charactersNumber = Math.ceil(this.state.board.length) / 2;
-    // this.game.teamSize = charactersNumber;
-    // this.game.maxCharacterLevel = 1;
-    // this.game.generateTeams();
     const { team } = this.game;
-    // console.log('getTemplatePosition');
-    // console.log(getTemplatePosition(10));
-    const delta = [...team].length - this.state.board.length;
+    const delta = Math.abs([...team].length - this.state.board.length);
     // console.log([...team].length);
-    // console.log(delta);
+    console.log('delta: ', delta);
     const pass = Array(delta).fill({ position: -1, character: { health: 0 } });
     [...team].forEach((pos, i) => this.fitTeam(pos, [...this.state.board, ...pass][i]));
-    // team.statistics = this.state.statistics;
     team.initTotalHealth = this.state.initTotalHealth;
     team.teamSize = { good: this.state.teamSize, evil: this.state.teamSize };
+    this.game.team.teamSize = this.state.teamSize;
+    this.game.team.initTotalHealth = this.state.initTotalHealth;
   }
 
   /* eslint no-param-reassign: "error" */
