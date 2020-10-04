@@ -39,7 +39,7 @@ export default class GameController {
     this.gamePlay.addNewGameListener(() => this.gamePlay.showModal('newGame'));
     this.gamePlay.addSaveGameListener(() => this.gamePlay.showModal('saveGame'));
     this.gamePlay.addLoadGameListener(() => this.gamePlay.showModal('loadGame'));
-    this.gamePlay.addDemoGameListener(() => this.newGame(16, 32, 12, 'evil', true));
+    this.gamePlay.addDemoGameListener(() => this.newGame(12, 20, 12, 'evil', true));
     clearInterval(this.timerId);
     this.timerId = setInterval(() => this.timer += 1, 1000);
   }
@@ -133,6 +133,7 @@ export default class GameController {
     this.theme = this.generateTheme.next().value;
     this.init();
     this.generateTeams();
+    this.team.highscore = this.highscore;
     this._gameStage = value;
     this.timer = 0;
     this.turn = 0;
@@ -153,7 +154,6 @@ export default class GameController {
     this.team.currentTurn = this._turn;
     this.team.gameStage = this.gameStage;
     this.team.score = this.score;
-    this.team.highscore = this.highscore;
     // this.characterCells = this.team.getAllIndex();
     this.playerCharacterCells = this.team.getTeamPosition(this.side);
     // console.log(this.side);
@@ -177,11 +177,23 @@ export default class GameController {
     return this._turn;
   }
 
+  set highscore(value) {
+    this._highscore = value;
+    this.gameState.highscore = value;
+  }
+
+  get highscore () {
+    return this._highscore;
+  }
+
   checkWinner() {
     if (!this.playerCharacterCells.length * this.enemyCharacterCells.length) {
       const winner = this.team.getPositionByIndex(this.characterCells[0]).character.side;
       console.log(winner);
       this.score += this.team.getTotalHealth(winner);
+      if (this.score > this.highscore) {
+        this.highscore = this.score;
+      }
       this.team.totalLevelUp();
       this.saveTeam = this.team.getCharacters();
       this.gameStage += 1;
@@ -192,16 +204,9 @@ export default class GameController {
 
   enemyAction() {
     console.log('enemyAction');
-    // this.blocked = false;
-    // console.log('blocked');
-    // await this.estimator.requestStrategy();
-    // this.blocked = true;
-    // console.log('unblocked');
-    // setTimeout(() => {
     if (this.side === this.estimator.side || this.demo) {
       this.estimator.requestStrategy();
     }
-    // }, 50);
   }
 
   async click(index) {
@@ -214,11 +219,6 @@ export default class GameController {
     if (position) {
       const message = position.getMessage();
       this.gamePlay.showCellTooltip(message, index);
-    }
-
-    if (this.blocked) {
-      this.action = () => this.gamePlay.showError('Управление заблокировано!');
-      return null;
     }
 
     if (this.activePosition) {

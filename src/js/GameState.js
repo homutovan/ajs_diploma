@@ -5,8 +5,17 @@ export default class GameState {
   constructor(game, driver) {
     this.game = game;
     this.driver = driver;
-    this.highscore = this.driver.highscore;
+    this._highscore = this.driver.highscore;
     this.init();
+  }
+
+  set highscore(value) {
+    this._highscore = value;
+    this.driver.highscore = value;
+  }
+
+  get highscore() {
+    return this._highscore;
   }
 
   init(name = 'autosave') {

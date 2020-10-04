@@ -110,14 +110,11 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
-    // console.log('redrawPositions');
-    // console.log(positions);
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
 
     for (const position of positions) {
-      // console.log(position);
       const cellEl = this.boardEl.children[position.position];
       const charEl = document.createElement('div');
       charEl.classList.add('character', position.character.type);
@@ -136,7 +133,6 @@ export default class GamePlay {
   }
 
   updateStatistics(statistics) {
-    console.log(statistics);
     const {
       currentTurn,
       gameStage,
@@ -429,13 +425,11 @@ export default class GamePlay {
     this.game.gamePause();
     this.game.demo = false;
     this.modal.style.display = 'block';
-    // console.log(`saveCont: ${this.saveContainer}`);
     this.createForm(formSelector(mode));
     this.registerEvents();
   }
 
   closeModal() {
-    console.log(this.demoState);
     this.modal.style.display = 'none';
     this.unregisterEvents();
     this.game.gameRun();
@@ -458,11 +452,9 @@ export default class GamePlay {
     this.form = this.modal.querySelector('#game-params-form');
     this.dismiss = this.modal.querySelector('button[data-dismiss="modal"]');
     this.boardSizeControl = this.modal.querySelector('#board-size-control');
-    // console.log(`this.boardSizeControl: ${this.boardSizeControl}`);
     this.teamSizeControl = this.modal.querySelector('#team-size-control');
     this.boardSizeIndicator = this.modal.querySelector('.board-size');
     this.teamSizeIndicator = this.modal.querySelector('.team-size');
-    // console.log(`this.saveContainer: ${this.saveContainer}`);
     this.dismiss.onclick = this.closeModal.bind(this);
     if (this.boardSizeControl) {
       this.boardSizeControl.onchange = this.showBoardSize.bind(this);
@@ -516,7 +508,6 @@ export default class GamePlay {
 
   createForm(form) {
     this.modal.innerHTML = form;
-    // console.log(this.saveContainer);
     this.saveContainer = this.modal.querySelector('.save-container');
     this.loadContainer = this.modal.querySelector('.load-container');
     if (this.saveContainer) {
