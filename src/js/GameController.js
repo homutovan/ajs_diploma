@@ -9,29 +9,31 @@ import {
   generateTheme,
 } from './generators';
 import { getPropagation, changePlayers } from './utils';
+import { timingSafeEqual } from 'crypto';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
+    this.gamePlay.game = this;
     this.stateService = stateService;
     this.gameState = new GameState(this, stateService);
     this.highscore = this.gameState.highscore || 0;
     this.estimator = new Estimator(this);
     this.saveTeam = [];
+    this.timerList = [];
     if (this.stateService.loadStatus) {
       this.loadGame();
     } else {
       this.newGame(16, 32, 12, 'evil', true);
     }
+    console.log(this.timerList);
+    // this.timerList.push(2);
+    // console.log(this.timerList);
+    // this.timerlist.push(setInterval(() => this.timer += 1, 1000));
   }
 
   init() {
     this.gamePlay.init(this.theme, this.boardSize, this.initialSide);
-    this.gamePlay.stateService = this.stateService;
-    this.gamePlay.startGame = this.newGame.bind(this);
-    this.gamePlay.writeGame = this.saveGame.bind(this);
-    this.gamePlay.readGame = this.loadGame.bind(this);
-    this.gamePlay.game = this;
     this.onCellClick = this.gameState.traceAction(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
@@ -40,8 +42,8 @@ export default class GameController {
     this.gamePlay.addSaveGameListener(() => this.gamePlay.showModal('saveGame'));
     this.gamePlay.addLoadGameListener(() => this.gamePlay.showModal('loadGame'));
     this.gamePlay.addDemoGameListener(() => this.newGame(12, 20, 12, 'evil', true));
-    clearInterval(this.timerId);
-    this.timerId = setInterval(() => this.timer += 1, 1000);
+    this.timerList.forEach((timer) => clearInterval(timer));
+    this.timerList.push(setInterval(() => this.timer += 1, 1000));
   }
 
   newGame(boardSize, teamSize, maxCharacterLevel, side, demo) {
@@ -72,16 +74,18 @@ export default class GameController {
     console.log(this.saveTeam);
     this.playerTeam = generateTeam(
       typeList,
-      this.maxCharacterLevel,
+      this.gameStage - 1,
       this.teamSize,
       this.side,
     );
+
     this.enemyTeam = generateTeam(
       typeList,
-      this.maxCharacterLevel,
+      this.gameStage,
       this.teamSize + this.saveTeam.length,
       this.enemySide,
     );
+
     this.team = new Team([
       ...generatePosition([...this.playerTeam, ...this.saveTeam], this.boardSize, this.initialSide),
       ...generatePosition(this.enemyTeam, this.boardSize, this.initialSide),
@@ -89,13 +93,14 @@ export default class GameController {
   }
 
   gamePause() {
-    clearInterval(this.timerId);
+    this.timerList.forEach((timer) => clearInterval(timer));
     this.demoState = this.demo;
     this.demo = false;
   }
 
   gameRun() {
-    this.timerId = setInterval(() => this.timer += 1, 1000);
+    console.log('game run');
+    this.timerList.push(setInterval(() => this.timer += 1, 1000));
     this.demo = this.demoState;
     this.turn = this.turn;
   }
@@ -131,10 +136,10 @@ export default class GameController {
     console.log('gameStage');
     this.side = this.initialSide;
     this.theme = this.generateTheme.next().value;
+    this._gameStage = value;
     this.init();
     this.generateTeams();
     this.team.highscore = this.highscore;
-    this._gameStage = value;
     this.timer = 0;
     this.turn = 0;
     console.log('end set stage');
@@ -150,6 +155,7 @@ export default class GameController {
       [this.side, this.enemySide] = [this.enemySide, this.side];
     }
     this._turn = value;
+    console.log(this.timerList);
     // console.log(this.team);
     this.team.currentTurn = this._turn;
     this.team.gameStage = this.gameStage;
@@ -165,10 +171,10 @@ export default class GameController {
     // console.log('redraw end');
     if (this.checkWinner()) return null;
     // console.log(this.side, this.estimator.side);
-    console.log('demo:', this.demo);
-    console.log(`curr side: ${this.side}`);
-    console.log(`estim side: ${this.estimator.side}`);
-    console.log(this.side === this.estimator.side);
+    // console.log('demo:', this.demo);
+    // console.log(`curr side: ${this.side}`);
+    // console.log(`estim side: ${this.estimator.side}`);
+    // console.log(this.side === this.estimator.side);
     this.enemyAction();
     return null;
   }
@@ -189,18 +195,34 @@ export default class GameController {
   checkWinner() {
     if (!this.playerCharacterCells.length * this.enemyCharacterCells.length) {
       const winner = this.team.getPositionByIndex(this.characterCells[0]).character.side;
-      console.log(winner);
-      this.score += this.team.getTotalHealth(winner);
-      if (this.score > this.highscore) {
-        this.highscore = this.score;
+      if (winner === this.initialSide) {
+        this.winPlayer(winner);
+      } else {
+        this.gameOver();
       }
-      this.team.totalLevelUp();
-      this.saveTeam = this.team.getCharacters();
-      this.gameStage += 1;
       return true;
     }
     return false;
   }
+
+ winPlayer(winner) {
+  this.score += this.team.getTotalHealth(winner);
+  if (this.score > this.highscore) {
+    this.highscore = this.score;
+  }
+  this.gamePlay.showModal('winPlayer');
+ }
+
+ gameNext() {
+   console.log('next');
+  this.saveTeam = this.team.getCharacters();
+  this.team.totalLevelUp();
+  this.gameStage += 1;
+ }
+ 
+ gameOver() {
+  this.gamePlay.showModal('gameOver');
+ }
 
   enemyAction() {
     console.log('enemyAction');

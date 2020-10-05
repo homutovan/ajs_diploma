@@ -18,13 +18,17 @@ export const typeList = Object.keys(charStats)
  * @returns Character type children (ex. Magician, Bowman, etc)
  */
 export function* characterGenerator(allowedTypes, maxLevel, characterCount, side) {
+  if (typeof maxLevel !== 'number') {
+    throw new Error('maxLevel must be a number');
+  } else if (typeof characterCount !== 'number') {
+    throw new Error('characterCount must be a number');
+  }
   let counter = 0;
   while (counter < characterCount) {
     const level = Math.floor(Math.random() * maxLevel) + 1;
     const character = new (getRandomElement(allowedTypes))(level);
     if (character.side === side) {
       counter += 1;
-      // console.log(character);
       yield character;
     }
   }

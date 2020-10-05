@@ -6,9 +6,14 @@ import {
   changePlayers,
   getTimer,
 } from './utils';
- 
+
 import cursors from './cursors';
-import formSelector from './forms';
+import formSelector from './forms/templateForms';
+import NewGameForm from './forms/NewGameForm';
+import SaveGameForm from './forms/SaveGameForm';
+import LoadGameForm from './forms/LoadGameForm';
+import GameOverForm from './forms/GameOverForm';
+import WinPlayerForm from './forms/WinPlayerForm';
 
 export default class GamePlay {
   constructor() {
@@ -30,6 +35,18 @@ export default class GamePlay {
     this.loadGameListeners = [];
     this.demoGameListeners = [];
     this.drawUi(theme);
+    this.modal = this.container.querySelector('.modal');
+    this.initForms();
+  }
+
+  initForms() {
+    this.forms = {
+      newGame: new NewGameForm('newGame', this.modal),
+      saveGame: new SaveGameForm('saveGame', this.modal),
+      loadGame: new LoadGameForm('loadGame', this.modal),
+      gameOver: new GameOverForm('gameOver', this.modal),
+      winPlayer: new WinPlayerForm('winPlayer', this.modal),
+    };
   }
 
   bindToDOM(container) {
@@ -52,7 +69,6 @@ export default class GamePlay {
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
     this.demoGameEl = this.container.querySelector('[data-id=action-demo]');
-    this.modal = this.container.querySelector('.modal');
     this.turnCounter = this.container.querySelector('.turn-counter');
     this.gameStage = this.container.querySelector('.game-stage');
     this.gameTimer = this.container.querySelector('.game-timer');
@@ -143,8 +159,8 @@ export default class GamePlay {
     this.updateSide(statistics.evil, 'evil');
     this.turnCounter.innerText = `Turn: ${currentTurn}`;
     this.gameStage.innerText = `Stage: ${gameStage}`;
-    this.currentScore.innerText = `Score: ${score}`;
-    this.highScore.innerText = `Highscore: ${highscore}`;
+    this.currentScore.innerText = `Score: \n${score}`;
+    this.highScore.innerText = `Highscore: \n${highscore}`;
   }
 
   updateTimer(timer) {
@@ -422,130 +438,13 @@ export default class GamePlay {
   }
 
   showModal(mode) {
-    this.game.gamePause();
-    this.game.demo = false;
-    this.modal.style.display = 'block';
-    this.createForm(formSelector(mode));
-    this.registerEvents();
+    this.activeForm = this.forms[mode];
+    this.activeForm.show(this.game);
   }
 
-  closeModal() {
-    this.modal.style.display = 'none';
-    this.unregisterEvents();
-    this.game.gameRun();
-  }
-
-  unregisterEvents() {
-    this.dismiss.onclick = '';
-    this.form.onsubmit = '';
-    if (this.boardSizeControl) {
-      this.boardSizeControl.onchange = '';
-      this.teamSizeControl.onchange = '';
-      this.boardSizeControl = '';
-      this.teamSizeControl = '';
-      this.boardSizeIndicator = '';
-      this.teamSizeIndicator = '';
-    }
-  }
-
-  registerEvents() {
-    this.form = this.modal.querySelector('#game-params-form');
-    this.dismiss = this.modal.querySelector('button[data-dismiss="modal"]');
-    this.boardSizeControl = this.modal.querySelector('#board-size-control');
-    this.teamSizeControl = this.modal.querySelector('#team-size-control');
-    this.boardSizeIndicator = this.modal.querySelector('.board-size');
-    this.teamSizeIndicator = this.modal.querySelector('.team-size');
-    this.dismiss.onclick = this.closeModal.bind(this);
-    if (this.boardSizeControl) {
-      this.boardSizeControl.onchange = this.showBoardSize.bind(this);
-      this.teamSizeControl.onchange = this.showTeamSize.bind(this);
-      this.form.onsubmit = this.newGame.bind(this);
-    } else if (this.saveContainer) {
-      this.form.onsubmit = this.saveGame.bind(this);
-    } else if (this.loadContainer) {
-      this.form.onsubmit = this.loadGame.bind(this);
-    }
-  }
-
-  eventHandler(event) {
-    event.preventDefault();
-    return new FormData(this.form);
-  }
-
-  newGame(event) {
-    const data = this.eventHandler(event);
-    const selectSide = data.get('side');
-    const selectBoardSize = +data.get('boardSize');
-    const selectTeamSize = +data.get('teamSize');
-    this.startGame(selectBoardSize, selectTeamSize, 4, selectSide, false);
-    // this.closeModal();
-  }
-
-  saveGame(event) {
-    const data = this.eventHandler(event);
-    const name = data.get('save-input');
-    this.writeGame(name);
-    this.closeModal();
-  }
-
-  loadGame(event) {
+  nextGame(event) {
     const data = this.eventHandler(event);
     const name = data.get('load-input');
     this.readGame(name);
-  }
-
-  showBoardSize(event) {
-    const { value } = event.target;
-    this.boardSizeIndicator.innerText = value;
-    this.teamSizeControl.max = 2 * value;
-    this.teamSizeIndicator.innerText = this.teamSizeControl.value;
-  }
-
-  showTeamSize(event) {
-    const { value } = event.target;
-    this.teamSizeIndicator.innerText = value;
-  }
-
-  createForm(form) {
-    this.modal.innerHTML = form;
-    this.saveContainer = this.modal.querySelector('.save-container');
-    this.loadContainer = this.modal.querySelector('.load-container');
-    if (this.saveContainer) {
-      this.fillSave(this.saveContainer);
-    } else if (this.loadContainer) {
-      this.fillLoad(this.loadContainer);
-    }
-  }
-
-  fillSave(saveContainer) {
-    saveContainer.innerHTML = '';
-    const saveList = this.stateService.getSaveList();
-    for (const save of saveList) {
-      const element = this.addElement(saveContainer, 'li', 'save-list-item', '');
-      const inner = this.addElement(element, 'div', `save ${save}`, '');
-      const saveNameEl = this.addElement(inner, 'div', 'save-name', save);
-      const delElement = this.addElement(inner, 'div', 'delete', 'X');
-      delElement.addEventListener('click', (event) => {
-        const keyName = event.target.parentNode.classList[1];
-        this.stateService.delete(keyName);
-        this.fillSave(saveContainer);
-      });
-    }
-  }
-
-  fillLoad(loadContainer) {
-    loadContainer.innerHTML = '';
-    const saveList = this.stateService.getSaveList();
-    for (const save of saveList) {
-      const element = this.addElement(loadContainer, 'option', 'load-list-item', save);
-      // const inner = this.addElement(element, 'div', `save ${save}`, '');
-      // const saveNameEl = this.addElement(inner, 'div', 'save-name', save);
-      // const delElement = this.addElement(inner, 'div', 'delete', 'X');
-      // delElement.addEventListener('click', (event) => {
-      //   const keyName = event.target.parentNode.classList[1];
-      //   this.stateService.delete(keyName);
-      //   this.fillSave(loadContainer);
-      // });
-    }
   }
 }

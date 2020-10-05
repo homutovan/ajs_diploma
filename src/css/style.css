@@ -36,6 +36,7 @@ body {
 .score {
   color: white;
   font-size: 3rem;
+  text-align: center;
 }
 
 .controls {
@@ -76,6 +77,7 @@ body {
   display: grid;
   grid-column-gap: 2px;
   grid-row-gap: 2px;
+  margin: 0 2%;
 }
 
 .game-info {
@@ -87,12 +89,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-image: url('../img/prairie/map-tile-center.png');
-  border-image-width: 5px;
-  border-width: 10px;
-  margin: 0 5%;
   padding: 20px;
-  border-radius: 2rem;
 }
 
 .title {
@@ -101,10 +98,6 @@ body {
   color: white;
   text-align: center;
 }
-
-/* .side-title {
-  margin-bottom: 30px;
-} */
 
 .stat-title {
   font-size: 2rem;
@@ -349,18 +342,13 @@ body {
 
 .modal {
   position: fixed;
-  /* background-color: black; */
   background: rgba(0,0,0,0.7);
-  /* opacity: 1; */
-  /* opacity: 0.3; */
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  /* display: block; */
   outline: solid red 4px;
   z-index: 999;
-  /* display: flex; */
   display: none;
   align-items: center;
   justify-content: center;
@@ -386,10 +374,6 @@ body {
   -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
   box-shadow: 0 3px 9px rgba(0,0,0,.5);
 }
-
-/* .modal-title {
-  font-size: 2rem;
-} */
 
 .form-group {
   display: flex;
