@@ -294,6 +294,7 @@ export default class GameController {
   }
 
   activatePosition(index) {
+    console.log('activate position');
     this.deactivatePosition();
     const position = this.team.getPositionByIndex(index);
     if (position) {
@@ -307,6 +308,7 @@ export default class GameController {
   }
 
   deactivatePosition() {
+    console.log('deactivate position');
     if (this.activePosition) {
       this.gamePlay.deselectCell(this.activePosition.position);
       this.gamePlay.dehighlightCell();

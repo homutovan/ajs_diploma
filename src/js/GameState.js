@@ -40,6 +40,7 @@ export default class GameState {
   }
 
   fixHistory(arg) {
+    console.log('fixHistory');
     this.state.currentTurn = this.game.turn;
     this.state.stage = this.game.gameStage;
     this.state.timer = this.game.timer;
