@@ -89,11 +89,11 @@ export default class GameController {
       ...generatePosition(this.enemyTeam, this.boardSize, this.initialSide),
     ]);
 
-    this.team.positionList[0].character.attack = 10000;
-    this.team.positionList[0].character.defense = 10000000000;
-    this.team.positionList[0].character.health = 10000000000;
-    this.team.positionList[0].character.range = 20;
-    this.team.positionList[0].character.distance = 20;
+    // this.team.positionList[0].character.attack = 10000;
+    // this.team.positionList[0].character.defense = 10000000000;
+    // this.team.positionList[0].character.health = 10000000000;
+    // this.team.positionList[0].character.range = 20;
+    // this.team.positionList[0].character.distance = 20;
   }
 
   fitBoard() {
