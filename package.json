@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "build": "webpack --mod",
+    "build": "webpack --mode development",
     "lint": "eslint .",
     "test": "jest",
     "coverage": "jest --coverage",

@@ -203,27 +203,26 @@ export default class GameController {
     return false;
   }
 
- winPlayer(winner) {
-  this.score += this.team.getTotalHealth(winner);
-  if (this.score > this.highscore) {
-    this.highscore = this.score;
+  winPlayer(winner) {
+    this.score += this.team.getTotalHealth(winner);
+    if (this.score > this.highscore) {
+      this.highscore = this.score;
+    }
+    this.gamePlay.showModal('winPlayer');
   }
-  this.gamePlay.showModal('winPlayer');
- }
 
- gameNext() {
-   console.log('next');
-  this.saveTeam = this.team.getCharacters();
-  this.team.totalLevelUp();
-  this.teamSize = this.gameStage - Math.floor(this.gameStage / 3);
-  console.log(`team size: ${this.teamSize}`);
-  console.log()
-  this.gameStage += 1;
- }
- 
- gameOver() {
-  this.gamePlay.showModal('gameOver');
- }
+  gameNext() {
+    console.log('next');
+    this.saveTeam = this.team.getCharacters();
+    this.team.totalLevelUp();
+    this.teamSize = this.gameStage - Math.floor(this.gameStage / 3);
+    console.log(`team size: ${this.teamSize}`);
+    this.gameStage += 1;
+  }
+
+  gameOver() {
+    this.gamePlay.showModal('gameOver');
+  }
 
   enemyAction() {
     // console.log('enemyAction');
@@ -279,7 +278,6 @@ export default class GameController {
   async movePosition(index) {
     const position = this.activePosition;
     this.deactivatePosition();
-    this.gamePlay.deselectCell(index);
     await this.gamePlay.animateAction(position.position, index, 'move');
     position.position = index;
   }
@@ -289,7 +287,6 @@ export default class GameController {
     const damage = position.character.getDamage(this.activePosition.character.attack);
     await this.gamePlay.animateAction(this.activePosition.position, index, 'attack', this.side);
     this.deactivatePosition();
-    this.gamePlay.deselectCell(index);
     await this.gamePlay.showDamage(index, damage);
   }
 
@@ -314,7 +311,6 @@ export default class GameController {
       this.gamePlay.dehighlightCell();
       this.gamePlay.setCursor('auto');
       this.action = this.activatePosition;
-      this.activePosition = null;
       this.transitionСells = [];
       this.attackСells = [];
     }
