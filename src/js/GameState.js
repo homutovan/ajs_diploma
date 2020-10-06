@@ -29,7 +29,7 @@ export default class GameState {
 
   traceAction(trackedFunction) {
     return async (arg) => {
-      console.log('traceAction');
+      // console.log('traceAction');
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
         this.fixHistory(arg);
         await trackedFunction.call(this.game, arg);
@@ -69,17 +69,16 @@ export default class GameState {
     if (name !== 'autosave') {
       this.init(name);
     }
-    this.game.demo = this.state.demo;
     this.game.score = this.state.score;
     this.game.boardSize = this.state.boardSize;
     this.game.teamSize = Math.ceil(this.state.board.length / 2);
-    this.game.maxCharacterLevel = 1;
     this.game.initialSide = this.state.initialSide;
     this.game.side = this.state.side;
     this.game.generateTheme = generateTheme(this.state.stage - 1);
     this.game.gameStage = this.state.stage;
     this.game.timer = this.state.timer;
     this.objToTeam();
+    this.game.demo = this.state.demo;
     this.game.turn = this.state.currentTurn + 1;
   }
 
@@ -107,8 +106,6 @@ export default class GameState {
   objToTeam() {
     const { team } = this.game;
     const delta = Math.abs([...team].length - this.state.board.length);
-    // console.log([...team].length);
-    console.log('delta: ', delta);
     const pass = Array(delta).fill({ position: -1, character: { health: 0 } });
     [...team].forEach((pos, i) => this.fitTeam(pos, [...this.state.board, ...pass][i]));
     team.initTotalHealth = this.state.initTotalHealth;

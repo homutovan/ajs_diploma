@@ -77,7 +77,7 @@ body {
   display: grid;
   grid-column-gap: 2px;
   grid-row-gap: 2px;
-  margin: 0 2%;
+  /* margin: 0 5%; */
 }
 
 .game-info {

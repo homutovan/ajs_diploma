@@ -7,7 +7,7 @@ export default class Estimator {
   }
 
   requestStrategy() {
-    console.log('request');
+    // console.log('request');
     this.randomStrategy();
     return null;
     // if (this.side === this.game.side) {

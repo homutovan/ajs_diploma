@@ -4,6 +4,7 @@ export const charStats = {
     defence: 25,
     distance: 2,
     range: 2,
+    unitLevel: 1,
     side: 'good',
   },
   swordsman: {
@@ -11,6 +12,7 @@ export const charStats = {
     defence: 10,
     distance: 4,
     range: 1,
+    unitLevel: 1,
     side: 'good',
   },
   magician: {
@@ -18,6 +20,7 @@ export const charStats = {
     defence: 40,
     distance: 1,
     range: 4,
+    unitLevel: 2,
     side: 'good',
   },
   vampire: {
@@ -25,6 +28,7 @@ export const charStats = {
     defence: 25,
     distance: 2,
     range: 2,
+    unitLevel: 1,
     side: 'evil',
   },
   undead: {
@@ -32,6 +36,7 @@ export const charStats = {
     defence: 10,
     distance: 4,
     range: 1,
+    unitLevel: 1,
     side: 'evil',
   },
   daemon: {
@@ -39,6 +44,7 @@ export const charStats = {
     defence: 40,
     distance: 1,
     range: 4,
+    unitLevel: 2,
     side: 'evil',
   },
 };
@@ -86,6 +92,7 @@ export default class Character {
         distance: this.distance,
         range: this.range,
         side: this.side,
+        unitLevel: this.unitLevel,
       } = charStats[value]);
       this._type = value;
     }

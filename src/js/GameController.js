@@ -1,15 +1,12 @@
-import themes from './themes';
 import Team from './Team';
 import GameState from './GameState';
 import Estimator from './Estimator';
 import {
   generatePosition,
   generateTeam,
-  typeList,
   generateTheme,
 } from './generators';
 import { getPropagation, changePlayers } from './utils';
-import { timingSafeEqual } from 'crypto';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -24,15 +21,18 @@ export default class GameController {
     if (this.stateService.loadStatus) {
       this.loadGame();
     } else {
-      this.newGame(16, 32, 12, 'evil', true);
+      this.newGame(12, 20, 'evil', true);
     }
-    console.log(this.timerList);
+    // console.log(this.timerList);
     // this.timerList.push(2);
     // console.log(this.timerList);
     // this.timerlist.push(setInterval(() => this.timer += 1, 1000));
   }
 
   init() {
+    this.side = this.initialSide;
+    this.theme = this.generateTheme.next().value;
+    this.fitBoard();
     this.gamePlay.init(this.theme, this.boardSize, this.initialSide);
     this.onCellClick = this.gameState.traceAction(this.click);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
@@ -41,28 +41,29 @@ export default class GameController {
     this.gamePlay.addNewGameListener(() => this.gamePlay.showModal('newGame'));
     this.gamePlay.addSaveGameListener(() => this.gamePlay.showModal('saveGame'));
     this.gamePlay.addLoadGameListener(() => this.gamePlay.showModal('loadGame'));
-    this.gamePlay.addDemoGameListener(() => this.newGame(12, 20, 12, 'evil', true));
+    this.gamePlay.addDemoGameListener(() => this.newGame(12, 20, 'evil', true));
     this.timerList.forEach((timer) => clearInterval(timer));
     this.timerList.push(setInterval(() => this.timer += 1, 1000));
+    this.generateTeams();
   }
 
-  newGame(boardSize, teamSize, maxCharacterLevel, side, demo) {
-    console.log('newGame');
+  newGame(boardSize, teamSize, side, demo) {
+    // console.log('newGame');
     this.demo = demo;
     this.score = 0;
     this.saveTeam = [];
     this.boardSize = boardSize;
     this.teamSize = teamSize;
-    this.maxCharacterLevel = maxCharacterLevel;
+    // this.maxCharacterLevel = maxCharacterLevel;
     this.initialSide = side;
     this.side = side;
     this.generateTheme = generateTheme();
     this.gameStage = 1;
-    console.log('end new game');
+    // console.log('end new game');
   }
 
   loadGame(name = 'autosave') {
-    console.log('loadGame');
+    // console.log('loadGame');
     this.gameState.recoverGame(name);
   }
 
@@ -71,16 +72,13 @@ export default class GameController {
   }
 
   generateTeams() {
-    console.log(this.saveTeam);
     this.playerTeam = generateTeam(
-      typeList,
       this.gameStage - 1,
       this.teamSize,
       this.side,
     );
 
     this.enemyTeam = generateTeam(
-      typeList,
       this.gameStage,
       this.teamSize + this.saveTeam.length,
       this.enemySide,
@@ -90,6 +88,20 @@ export default class GameController {
       ...generatePosition([...this.playerTeam, ...this.saveTeam], this.boardSize, this.initialSide),
       ...generatePosition(this.enemyTeam, this.boardSize, this.initialSide),
     ]);
+
+    this.team.positionList[0].character.attack = 10000;
+    this.team.positionList[0].character.defense = 10000000000;
+    this.team.positionList[0].character.health = 10000000000;
+    this.team.positionList[0].character.range = 20;
+    this.team.positionList[0].character.distance = 20;
+  }
+
+  fitBoard() {
+    const capacity = this.boardSize * Math.floor((this.boardSize - 1) ** 0.5);
+    const delta = capacity - (this.saveTeam.length + this.teamSize);
+    if (delta < 0) {
+      this.boardSize -= Math.floor(delta / 2);
+    }
   }
 
   gamePause() {
@@ -100,7 +112,7 @@ export default class GameController {
 
   gameRun() {
     console.log('game run');
-    this.timerList.push(setInterval(() => this.timer += 1, 1000));
+    // this.timerList.push(setInterval(() => this.timer += 1, 1000));
     this.demo = this.demoState;
     this.turn = this.turn;
   }
@@ -134,11 +146,8 @@ export default class GameController {
 
   set gameStage(value) {
     console.log('gameStage');
-    this.side = this.initialSide;
-    this.theme = this.generateTheme.next().value;
     this._gameStage = value;
     this.init();
-    this.generateTeams();
     this.team.highscore = this.highscore;
     this.timer = 0;
     this.turn = 0;
@@ -150,31 +159,20 @@ export default class GameController {
   }
 
   set turn(value) {
-    console.log('set turn');
+    // console.log('set turn');
     if (value - this._turn === 1) {
       [this.side, this.enemySide] = [this.enemySide, this.side];
     }
     this._turn = value;
-    console.log(this.timerList);
-    // console.log(this.team);
+    // console.log(this.timerList);
     this.team.currentTurn = this._turn;
     this.team.gameStage = this.gameStage;
     this.team.score = this.score;
-    // this.characterCells = this.team.getAllIndex();
     this.playerCharacterCells = this.team.getTeamPosition(this.side);
-    // console.log(this.side);
-    // console.log(this.playerCharacterCells);
     this.enemyCharacterCells = this.team.getTeamPosition(this.enemySide);
-    // console.log(this.enemyCharacterCells);
     this.characterCells = [...this.playerCharacterCells, ...this.enemyCharacterCells];
-    this.gamePlay.redrawPositions(this.team);
-    // console.log('redraw end');
+    this.gamePlay.redrawPositions();
     if (this.checkWinner()) return null;
-    // console.log(this.side, this.estimator.side);
-    // console.log('demo:', this.demo);
-    // console.log(`curr side: ${this.side}`);
-    // console.log(`estim side: ${this.estimator.side}`);
-    // console.log(this.side === this.estimator.side);
     this.enemyAction();
     return null;
   }
@@ -217,6 +215,9 @@ export default class GameController {
    console.log('next');
   this.saveTeam = this.team.getCharacters();
   this.team.totalLevelUp();
+  this.teamSize = this.gameStage - Math.floor(this.gameStage / 3);
+  console.log(`team size: ${this.teamSize}`);
+  console.log()
   this.gameStage += 1;
  }
  
@@ -225,14 +226,14 @@ export default class GameController {
  }
 
   enemyAction() {
-    console.log('enemyAction');
+    // console.log('enemyAction');
     if (this.side === this.estimator.side || this.demo) {
       this.estimator.requestStrategy();
     }
   }
 
   async click(index) {
-    console.log('click');
+    // console.log('click');
     await this.action(index);
   }
 

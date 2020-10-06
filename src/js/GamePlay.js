@@ -125,12 +125,12 @@ export default class GamePlay {
    *
    * @param positions array of PositionedCharacter objects
    */
-  redrawPositions(positions) {
+  redrawPositions() {
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
 
-    for (const position of positions) {
+    for (const position of this.game.team) {
       const cellEl = this.boardEl.children[position.position];
       const charEl = document.createElement('div');
       charEl.classList.add('character', position.character.type);
@@ -145,10 +145,11 @@ export default class GamePlay {
       cellEl.appendChild(charEl);
     }
     this.deselectAll();
-    this.updateStatistics(positions.statistics);
+    this.updateStatistics();
   }
 
-  updateStatistics(statistics) {
+  updateStatistics() {
+    const { statistics } = this.game.team;
     const {
       currentTurn,
       gameStage,

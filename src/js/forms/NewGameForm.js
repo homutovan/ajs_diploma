@@ -27,6 +27,6 @@ export default class NewGameForm extends Form {
     const selectSide = data.get('side');
     const selectBoardSize = +data.get('boardSize');
     const selectTeamSize = +data.get('teamSize');
-    this.game.newGame(selectBoardSize, selectTeamSize, 4, selectSide, false);
+    this.game.newGame(selectBoardSize, selectTeamSize, selectSide, false);
   }
 }
