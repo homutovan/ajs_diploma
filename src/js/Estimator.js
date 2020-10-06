@@ -1,4 +1,4 @@
-import { getRandomElement } from './utils';
+import { getRandomElement, calcDamage, getPropagation } from './utils';
 
 export default class Estimator {
   constructor(game) {
@@ -7,32 +7,115 @@ export default class Estimator {
   }
 
   requestStrategy() {
-    // console.log('request');
-    this.randomStrategy();
+    console.log('request');
+    console.log(this.side);
+    if (!(this.side === this.game.side)) {
+      this.smartStrategy();
+    } else {
+      this.randomStrategy();
+    }
     return null;
-    // if (this.side === this.game.side) {
-    //   console.log('random action');
-    //   this.randomStrategy();
-    // } else {
-    //   console.log('revenge action');
-    //   this.revengeStrategy();
-    // }
+  }
+
+  smartStrategy() {
+    console.log('smart');
+    this.firingZone = this.getFiringZone();
+    // this.moveStrategy();
+    if (this.revengeStrategy()) {
+      return null;
+    } else if (this.attackStrategy()) {
+      return null;
+    } else if (this.tacticalRetreat()) {
+      return null;
+    } else {
+      this.randomStrategy();
+    }
+    return null;
+  }
+
+  moveStrategy() {
+    // const availableCharacter = this.game.playerCharacterCells;
+
+  }
+
+  tacticalRetreat() {
+    const availableCharacter = this.game.playerCharacterCells;
+    for (const index of availableCharacter) {
+      if (this.firingZone.includes(index)) {
+        this.game.activatePosition(index);
+        const availableCells = this.game.transitionСells;
+        const saveCells = availableCells
+          .filter((element) => !this.firingZone.includes(element));
+        if (saveCells.length) {
+          const moveTarget = getRandomElement(saveCells);
+          this.game.action = this.game.movePosition;
+          this.game.tracedAction(moveTarget);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  getFiringZone() {
+    const enemyCharacter = this.game.enemyCharacterCells;
+    let firingZone = new Set();
+    for (const index of enemyCharacter) {
+      const position = this.game.team.getPositionByIndex(index);
+      const { character: { range } } = position;
+      const dangerCells = getPropagation(index, range, this.game.boardSize);
+      firingZone = new Set([...dangerCells, ...firingZone]);
+    }
+    return [...firingZone];
+  }
+
+  attackStrategy() {
+    console.log('attackStrategy');
+    const availableCharacter = this.game.playerCharacterCells;
+    const bestTargets = [];
+    for (const index of availableCharacter) {
+      this.game.activatePosition(index);
+      const { character: { attack } } = this.game.activePosition;
+      const availableTargets = this.game.attackСells;
+      for (const target of availableTargets) {
+        const { character: { defense } } = this.game.team.getPositionByIndex(target);
+        const damage = calcDamage(attack, defense);
+        bestTargets.push({
+          damage,
+          index,
+          target,
+        });
+      }
+    }
+    const selectTarget = bestTargets.sort((a, b) => b.damage - a.damage)[0];
+    if (selectTarget) {
+      const { index, target } = selectTarget;
+      this.game.activatePosition(index);
+      this.game.action = this.game.attackPosition;
+      this.game.tracedAction(target);
+      return true;
+    }
+    return false;
   }
 
   revengeStrategy() {
+    console.log('revengeStrategy');
     const { action, from, to } = this.game.gameState.getLastTurn();
     const availableCharacter = this.game.playerCharacterCells;
     if (action === 'attackPosition' && availableCharacter.includes(to)) {
       this.game.activatePosition(to);
-      this.game.action = this.game.attackPosition;
-      this.game.onCellClick(from);
+      if (this.game.attackСells.includes(from)) {
+        this.game.action = this.game.attackPosition;
+        this.game.tracedAction(from);
+        return true;
+      }
     }
-    this.randomStrategy();
+    return false;
   }
 
   async randomStrategy() {
+    console.log('random');
     const availableCharacter = this.game.playerCharacterCells;
-    // console.log(`availableCharacter: ${availableCharacter}`);
     let loop = true;
     while (loop) {
       const selectIndex = getRandomElement(availableCharacter);
@@ -47,7 +130,7 @@ export default class Estimator {
         continue;
       }
       loop = false;
-      this.game.onCellClick(attackTarget || moveTarget);
+      this.game.tracedAction(attackTarget || moveTarget);
     }
   }
 }

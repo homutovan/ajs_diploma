@@ -1,3 +1,5 @@
+import { calcDamage } from './utils';
+
 export const charStats = {
   bowman: {
     attack: 25,
@@ -110,7 +112,7 @@ export default class Character {
   }
 
   getDamage(attack) {
-    const damage = Math.floor(Math.max(attack - this.defense, attack * 0.1));
+    const damage = calcDamage(attack, this.defense);
     this.health -= damage;
     return damage;
   }

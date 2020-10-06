@@ -56,3 +56,7 @@ export function getTimer(count) {
     },
   );
 }
+
+export function calcDamage(attack, defense) {
+  return Math.floor(Math.max(attack - defense, attack * 0.1));
+}

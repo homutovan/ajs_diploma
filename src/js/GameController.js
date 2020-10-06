@@ -30,11 +30,12 @@ export default class GameController {
   }
 
   init() {
+    this.activePosition = null;
     this.side = this.initialSide;
     this.theme = this.generateTheme.next().value;
     this.fitBoard();
     this.gamePlay.init(this.theme, this.boardSize, this.initialSide);
-    this.onCellClick = this.gameState.traceAction(this.click);
+    this.tracedAction = this.gameState.traceAction(this.gameAction);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
@@ -145,13 +146,13 @@ export default class GameController {
   }
 
   set gameStage(value) {
-    console.log('gameStage');
+    // console.log('gameStage');
     this._gameStage = value;
     this.init();
     this.team.highscore = this.highscore;
     this.timer = 0;
     this.turn = 0;
-    console.log('end set stage');
+    // console.log('end set stage');
   }
 
   get gameStage() {
@@ -186,7 +187,7 @@ export default class GameController {
     this.gameState.highscore = value;
   }
 
-  get highscore () {
+  get highscore() {
     return this._highscore;
   }
 
@@ -231,12 +232,18 @@ export default class GameController {
     }
   }
 
-  async click(index) {
-    // console.log('click');
+  async onCellClick(index) {
+    if (!this.demo) {
+      await this.tracedAction(index);
+    }
+  }
+
+  async gameAction(index) {
     await this.action(index);
   }
 
   onCellEnter(index) {
+    if (this.demo) return null;
     const position = this.team.getPositionByIndex(index);
     if (position) {
       const message = position.getMessage();
@@ -264,6 +271,7 @@ export default class GameController {
       this.gamePlay.enterCell(index);
       this.action = this.activatePosition;
     }
+    return null;
   }
 
   onCellLeave(index) {
@@ -291,7 +299,6 @@ export default class GameController {
   }
 
   activatePosition(index) {
-    console.log('activate position');
     this.deactivatePosition();
     const position = this.team.getPositionByIndex(index);
     if (position) {
@@ -305,7 +312,6 @@ export default class GameController {
   }
 
   deactivatePosition() {
-    console.log('deactivate position');
     if (this.activePosition) {
       this.gamePlay.deselectCell(this.activePosition.position);
       this.gamePlay.dehighlightCell();

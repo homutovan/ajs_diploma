@@ -29,7 +29,6 @@ export default class GameState {
 
   traceAction(trackedFunction) {
     return async (arg) => {
-      // console.log('traceAction');
       if (this.game.action.name && this.game.action.name !== 'activatePosition') {
         this.fixHistory(arg);
         await trackedFunction.call(this.game, arg);
@@ -40,7 +39,7 @@ export default class GameState {
   }
 
   fixHistory(arg) {
-    console.log('fixHistory');
+    // console.log('fixHistory');
     this.state.currentTurn = this.game.turn;
     this.state.stage = this.game.gameStage;
     this.state.timer = this.game.timer;
