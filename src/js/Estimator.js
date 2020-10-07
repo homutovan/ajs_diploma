@@ -20,7 +20,7 @@ export default class Estimator {
   smartStrategy() {
     console.log('smart');
     this.firingZone = this.getFiringZone();
-    // this.moveStrategy();
+    this.availableCharacter = this.game.playerCharacterCells;
     if (this.revengeStrategy()) {
       return null;
     } else if (this.attackStrategy()) {
@@ -33,14 +33,10 @@ export default class Estimator {
     return null;
   }
 
-  moveStrategy() {
-    // const availableCharacter = this.game.playerCharacterCells;
 
-  }
 
   tacticalRetreat() {
-    const availableCharacter = this.game.playerCharacterCells;
-    for (const index of availableCharacter) {
+    for (const index of this.availableCharacter) {
       if (this.firingZone.includes(index)) {
         this.game.activatePosition(index);
         const availableCells = this.game.transitionСells;
@@ -64,6 +60,7 @@ export default class Estimator {
       const position = this.game.team.getPositionByIndex(index);
       const { character: { range } } = position;
       const dangerCells = getPropagation(index, range, this.game.boardSize);
+      const prey = this.availableCharacter.filter((element) => dangerCells.includes(element));
       firingZone = new Set([...dangerCells, ...firingZone]);
     }
     return [...firingZone];
@@ -71,17 +68,17 @@ export default class Estimator {
 
   attackStrategy() {
     console.log('attackStrategy');
-    const availableCharacter = this.game.playerCharacterCells;
     const bestTargets = [];
-    for (const index of availableCharacter) {
+    for (const index of this.availableCharacter) {
       this.game.activatePosition(index);
-      const { character: { attack } } = this.game.activePosition;
+      const { character: { attack: selfAttack, defense: selfDefense } } = this.game.activePosition;
       const availableTargets = this.game.attackСells;
       for (const target of availableTargets) {
-        const { character: { defense } } = this.game.team.getPositionByIndex(target);
-        const damage = calcDamage(attack, defense);
+        const { character: { attack: otherAttack, defense: otherDefense } } = this.game.team.getPositionByIndex(target);
+        const selfDamage = calcDamage(selfAttack, otherDefense);
+        const otherDamage = calcDamage(otherAttack, selfDefense);
         bestTargets.push({
-          damage,
+          damage: selfDamage,
           index,
           target,
         });
@@ -101,8 +98,7 @@ export default class Estimator {
   revengeStrategy() {
     console.log('revengeStrategy');
     const { action, from, to } = this.game.gameState.getLastTurn();
-    const availableCharacter = this.game.playerCharacterCells;
-    if (action === 'attackPosition' && availableCharacter.includes(to)) {
+    if (action === 'attackPosition' && this.availableCharacter.includes(to)) {
       this.game.activatePosition(to);
       if (this.game.attackСells.includes(from)) {
         this.game.action = this.game.attackPosition;
