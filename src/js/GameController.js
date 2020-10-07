@@ -209,7 +209,11 @@ export default class GameController {
     if (this.score > this.highscore) {
       this.highscore = this.score;
     }
-    this.gamePlay.showModal('winPlayer');
+    if (this.demo) {
+      this.gameNext();
+    } else {
+      this.gamePlay.showModal('winPlayer');
+    }
   }
 
   gameNext() {

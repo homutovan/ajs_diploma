@@ -14,7 +14,7 @@ export default class Estimator {
 
   requestStrategy() {
     console.log('request');
-    console.log(this.side);
+    // console.log(this.side);
     if (!(this.side === this.game.side)) {
       this.smartStrategy();
     } else {
@@ -61,8 +61,6 @@ export default class Estimator {
         if (metric(moveTarget) < metric(index)) {
           this.game.action = this.game.movePosition;
           this.game.tracedAction(moveTarget);
-          console.log(`index: ${index}`);
-          console.log(`moveTarget: ${moveTarget}`);
           return true;
         }
       }
