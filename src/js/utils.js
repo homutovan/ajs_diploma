@@ -25,9 +25,13 @@ export function getBoard(boardSize) {
   ];
 }
 
+export function getBoardIndex(boardSize) {
+  return Array(boardSize ** 2).fill('').map((_, i) => i);
+}
+
 export function getPropagation(index, radius, boardSize) {
   const metric = (element) => distanceMetric(element, index, boardSize);
-  return Array(boardSize ** 2).fill('').map((_, i) => i)
+  return getBoardIndex(boardSize)
     .filter((element) => (element !== index)
       && metric(element) <= radius
       && Number.isInteger(metric(element)));
@@ -59,4 +63,18 @@ export function getTimer(count) {
 
 export function calcDamage(attack, defense) {
   return Math.floor(Math.max(attack - defense, attack * 0.1));
+}
+
+export function getAnchorPoint(pointList, boardSize) {
+  const col = Math.floor(
+    pointList
+      .map((element) => element % boardSize)
+      .reduce((acc, element) => acc + element) / pointList.length,
+  );
+  const row = Math.floor(
+    pointList
+      .map((element) => Math.ceil(element / boardSize))
+      .reduce((acc, element) => acc + element) / pointList.length,
+  );
+  return row * boardSize + col;
 }

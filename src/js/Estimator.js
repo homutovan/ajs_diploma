@@ -1,4 +1,10 @@
-import { getRandomElement, calcDamage, getPropagation } from './utils';
+import {
+  getRandomElement,
+  calcDamage,
+  getPropagation,
+  distanceMetric,
+  getAnchorPoint,
+} from './utils';
 
 export default class Estimator {
   constructor(game) {
@@ -19,21 +25,50 @@ export default class Estimator {
 
   smartStrategy() {
     console.log('smart');
-    this.firingZone = this.getFiringZone();
     this.availableCharacter = this.game.playerCharacterCells;
-    if (this.revengeStrategy()) {
-      return null;
-    } else if (this.attackStrategy()) {
+    this.firingZone = this.getFiringZone();
+    // this.getSituationalPlan();
+    if (this.attackStrategy()) {
       return null;
     } else if (this.tacticalRetreat()) {
       return null;
+    } else if (this.agressiveStrategy()) {
+      return null;
     } else {
+      console.log('#########################################');
       this.randomStrategy();
     }
     return null;
   }
 
-
+  agressiveStrategy() {
+    const {
+      playerCharacterCells,
+      enemyCharacterCells,
+      boardSize,
+    } = this.game;
+    const anchorPoint = getAnchorPoint(enemyCharacterCells, boardSize);
+    const metric = (point) => distanceMetric(point, anchorPoint, boardSize);
+    const sortToFar = playerCharacterCells.sort((a, b) => metric(b) - metric(a));
+    for (const index of sortToFar) {
+      this.game.activatePosition(index);
+      const availableCells = this.game.transitionСells;
+      if (availableCells.length) {
+        const sortToNear = availableCells.sort((a, b) => metric(a) - metric(b));
+        const saveCells = sortToNear
+          .filter((element) => !this.firingZone.includes(element));
+        const moveTarget = saveCells[0];
+        if (metric(moveTarget) < metric(index)) {
+          this.game.action = this.game.movePosition;
+          this.game.tracedAction(moveTarget);
+          console.log(`index: ${index}`);
+          console.log(`moveTarget: ${moveTarget}`);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   tacticalRetreat() {
     for (const index of this.availableCharacter) {
@@ -71,7 +106,9 @@ export default class Estimator {
     const bestTargets = [];
     for (const index of this.availableCharacter) {
       this.game.activatePosition(index);
-      const { character: { attack: selfAttack, defense: selfDefense } } = this.game.activePosition;
+      const {
+        character: { attack: selfAttack, defense: selfDefense },
+      } = this.game.activePosition;
       const availableTargets = this.game.attackСells;
       for (const target of availableTargets) {
         const { character: { attack: otherAttack, defense: otherDefense } } = this.game.team.getPositionByIndex(target);
@@ -91,20 +128,6 @@ export default class Estimator {
       this.game.action = this.game.attackPosition;
       this.game.tracedAction(target);
       return true;
-    }
-    return false;
-  }
-
-  revengeStrategy() {
-    console.log('revengeStrategy');
-    const { action, from, to } = this.game.gameState.getLastTurn();
-    if (action === 'attackPosition' && this.availableCharacter.includes(to)) {
-      this.game.activatePosition(to);
-      if (this.game.attackСells.includes(from)) {
-        this.game.action = this.game.attackPosition;
-        this.game.tracedAction(from);
-        return true;
-      }
     }
     return false;
   }

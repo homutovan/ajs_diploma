@@ -88,10 +88,6 @@ export default class GameState {
     this.driver.save(this.state, name);
   }
 
-  getLastTurn() {
-    return this.state.history[this.state.history.length - 1];
-  }
-
   teamToObj(position) {
     const obj = { character: {} };
     obj.position = position.position;
