@@ -42,7 +42,7 @@ export function generateTeam(maxLevel, characterCount, side) {
 
 export function generatePosition(characterList, boardSize, playerSide) {
   const location = characterList[0].side === playerSide;
-  const rowsNumber = Math.floor((boardSize - 1) ** 0.5);
+  const rowsNumber = Math.floor(boardSize / 3);
   const restrictor = (_, i) => (location
     ? (i * boardSize) : (i * boardSize + boardSize - rowsNumber));
   const vertLine = Array(boardSize).fill('').map(restrictor);
@@ -51,7 +51,7 @@ export function generatePosition(characterList, boardSize, playerSide) {
     availablePosition = [...availablePosition, ...vertLine.map((el) => el + row)];
   }
   const position = availablePosition.sort(() => Math.random() - 0.5).slice(0, characterList.length);
-  return characterList.map((character, i) => new PositionedCharacter(character, position[i]));
+  return characterList.map((character, i) => new PositionedCharacter(character, position[i], boardSize));
 }
 
 export function* generateTheme(startTheme = 0) {

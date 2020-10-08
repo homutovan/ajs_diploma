@@ -10,6 +10,7 @@ export default class Team {
     this.positionList = this.positionList
       .filter((element) => element.character.health > 0);
     this.calcStatistics();
+    this.allIndex = this.getAllIndex();
     for (const position of this.positionList) {
       yield position;
     }
@@ -21,6 +22,7 @@ export default class Team {
     this.teamSize = {};
     this.currentTurn = 0;
     this.gameStage = 0;
+    this.positionList.map((element) => element.team = this);
 
     for (const side in changePlayers) {
       if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {
@@ -31,7 +33,6 @@ export default class Team {
   }
 
   getTeamPosition(side) {
-    // console.log(side);
     return this.positionList
       .map((element) => element.character.side === side && element.position)
       .filter((element) => element !== false);

@@ -55,12 +55,10 @@ export default class GameController {
     this.saveTeam = [];
     this.boardSize = boardSize;
     this.teamSize = teamSize;
-    // this.maxCharacterLevel = maxCharacterLevel;
     this.initialSide = side;
     this.side = side;
     this.generateTheme = generateTheme();
     this.gameStage = 1;
-    // console.log('end new game');
   }
 
   loadGame(name = 'autosave') {
@@ -98,7 +96,7 @@ export default class GameController {
   }
 
   fitBoard() {
-    const capacity = this.boardSize * Math.floor((this.boardSize - 1) ** 0.5);
+    const capacity = this.boardSize * Math.floor(this.boardSize / 3);
     const delta = capacity - (this.saveTeam.length + this.teamSize);
     if (delta < 0) {
       this.boardSize -= Math.floor(delta / 2);
@@ -171,7 +169,7 @@ export default class GameController {
     this.team.score = this.score;
     this.playerCharacterCells = this.team.getTeamPosition(this.side);
     this.enemyCharacterCells = this.team.getTeamPosition(this.enemySide);
-    this.characterCells = [...this.playerCharacterCells, ...this.enemyCharacterCells];
+    this.characterCells = this.team.getAllIndex();
     this.gamePlay.redrawPositions();
     if (this.checkWinner()) return null;
     this.enemyAction();
@@ -221,7 +219,7 @@ export default class GameController {
     this.saveTeam = this.team.getCharacters();
     this.team.totalLevelUp();
     this.teamSize = this.gameStage - Math.floor(this.gameStage / 3);
-    console.log(`team size: ${this.teamSize}`);
+    // console.log(`team size: ${this.teamSize}`);
     this.gameStage += 1;
   }
 
@@ -247,11 +245,13 @@ export default class GameController {
   }
 
   onCellEnter(index) {
-    if (this.demo) return null;
     const position = this.team.getPositionByIndex(index);
     if (position) {
       const message = position.getMessage();
       this.gamePlay.showCellTooltip(message, index);
+    }
+    if (this.demo) {
+      return null;
     }
 
     if (this.activePosition) {
@@ -309,7 +309,7 @@ export default class GameController {
       if (position.character.side === this.side) {
         this.activePosition = position;
         this.gamePlay.selectCell(index);
-        this.distributionCells(index);
+        this.distributionCells();
         this.gamePlay.highlightCell(this.transitionСells);
       }
     }
@@ -326,11 +326,9 @@ export default class GameController {
     }
   }
 
-  distributionCells(index) {
-    const { distance, range } = this.activePosition.character;
-    this.transitionСells = getPropagation(index, distance, this.boardSize)
-      .filter((element) => !this.characterCells.includes(element));
-    this.attackСells = getPropagation(index, range, this.boardSize)
+  distributionCells() {
+    this.transitionСells = this.activePosition.getTransition();
+    this.attackСells = this.activePosition.getAttack()
       .filter((element) => this.enemyCharacterCells.includes(element));
   }
 }

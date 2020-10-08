@@ -8,8 +8,8 @@ export function calcTileType(index, board) {
 export function distanceMetric(pointA, pointB, boardSize) {
   const pointAX = pointA % boardSize;
   const pointBX = pointB % boardSize;
-  const pointAY = (pointA - (pointA % boardSize)) / boardSize;
-  const pointBY = (pointB - (pointB % boardSize)) / boardSize;
+  const pointAY = Math.floor(pointA / boardSize);
+  const pointBY = Math.floor(pointB / boardSize);
   let distance = ((pointAX - pointBX) ** 2 + (pointAY - pointBY) ** 2) ** 0.5;
   if (!Number.isInteger(distance)) {
     distance /= Math.SQRT2;
@@ -77,4 +77,25 @@ export function getAnchorPoint(pointList, boardSize) {
       .reduce((acc, element) => acc + element) / pointList.length,
   );
   return row * boardSize + col;
+}
+
+export function getExtraRestriction(propogation, restriction, initRadius, position, boardSize) {
+  const currentRestriction = restriction
+    .filter((element) => propogation.includes(element));
+  const rowPosition = Math.floor(position / boardSize);
+  const colPosition = position % boardSize;
+  const extraRestriction = [];
+  for (const point of currentRestriction) {
+    const rowPoint = Math.floor(point / boardSize);
+    const colPoint = point % boardSize;
+    const deltaRow = Math.sign(rowPoint - rowPosition);
+    const deltaCol = Math.sign(colPoint - colPosition);
+    const deltaPoint = deltaRow * boardSize + deltaCol;
+    const radius = Math.abs(deltaRow || deltaCol);
+    for (let step = radius; step < initRadius; step += 1) {
+      const nextPoint = point + deltaPoint * step;
+      extraRestriction.push(nextPoint);
+    }
+  }
+  return extraRestriction;
 }

@@ -29,10 +29,12 @@ export default class Estimator {
     this.firingZone = this.getFiringZone();
     // this.getSituationalPlan();
     if (this.attackStrategy()) {
+      console.log('attackStrategy');
       return null;
     } else if (this.tacticalRetreat()) {
       return null;
     } else if (this.agressiveStrategy()) {
+      console.log('agressiveStrategy');
       return null;
     } else {
       console.log('#########################################');
@@ -100,7 +102,6 @@ export default class Estimator {
   }
 
   attackStrategy() {
-    console.log('attackStrategy');
     const bestTargets = [];
     for (const index of this.availableCharacter) {
       this.game.activatePosition(index);
