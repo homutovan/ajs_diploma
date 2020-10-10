@@ -16,8 +16,12 @@ export default class Estimator {
   requestStrategy() {
     console.log('request');
     // console.log(this.side);
-    if (!(this.side === this.game.side)) {
-      this.smartStrategy();
+    if (this.game.demo) {
+      if (this.side !== this.game.side) {
+        this.smartStrategy();
+      } else {
+        this.randomStrategy();
+      }
     } else {
       this.randomStrategy();
     }
