@@ -50,9 +50,9 @@ export default class GameState {
     this.state.demo = this.game.demo;
     this.state.initialSide = this.game.initialSide;
     this.state.side = changePlayers[this.game.side];
-    if (this.state.history.length > 10) {
-      this.state.history.shift();
-    }
+    // if (this.state.history.length > 10) {
+    //   this.state.history.shift();
+    // }
     this.state.history.push({
       stage: this.game.gameStage,
       turn: this.game.turn,
@@ -100,6 +100,7 @@ export default class GameState {
   }
 
   objToTeam() {
+    // console.log('objToTeam');
     const { team } = this.game;
     const delta = Math.abs([...team].length - this.state.board.length);
     const pass = Array(delta).fill({ position: -1, character: { health: 0 } });
@@ -112,6 +113,7 @@ export default class GameState {
 
   /* eslint no-param-reassign: "error" */
   fitTeam(position, object) {
+    // console.log('fit');
     position.position = object.position;
     for (const property in position.character) {
       if (Object.prototype.hasOwnProperty.call(position.character, property)) {

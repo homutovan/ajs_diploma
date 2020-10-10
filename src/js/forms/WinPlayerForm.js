@@ -7,7 +7,6 @@ export default class WinPlayerForm extends Form {
   }
 
   dismis(event) {
-    console.log('dismis');
     this.game.gameNext();
     this.close();
   }

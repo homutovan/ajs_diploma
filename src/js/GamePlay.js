@@ -62,7 +62,7 @@ export default class GamePlay {
    * @param theme
    */
   drawUi(theme) {
-    console.log('drawUi');
+    // console.log('drawUi');
     this.checkBinding();
     this.container.innerHTML = formSelector('main');
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
@@ -126,6 +126,7 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions() {
+    // console.log('redraw');
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }

@@ -1,3 +1,4 @@
+import maxHealth from './variables';
 import { calcDamage } from './utils';
 
 export const charStats = {
@@ -73,7 +74,7 @@ export default class Character {
   }
 
   set health(value) {
-    this._helath = Math.min(100, value);
+    this._helath = Math.min(maxHealth, value);
   }
 
   get health() {

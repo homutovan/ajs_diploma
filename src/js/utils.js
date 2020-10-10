@@ -1,3 +1,5 @@
+import maxHealth from './variables';
+
 export const changePlayers = { good: 'evil', evil: 'good' };
 
 export function calcTileType(index, board) {
@@ -62,7 +64,8 @@ export function getTimer(count) {
 }
 
 export function calcDamage(attack, defense) {
-  return Math.floor(Math.max(attack - defense, attack * 0.1));
+  const damage = Math.floor(Math.max(attack - defense, attack * 0.1));
+  return (damage < maxHealth) ? damage : maxHealth;
 }
 
 export function getAnchorPoint(pointList, boardSize) {
@@ -88,14 +91,79 @@ export function getExtraRestriction(propogation, restriction, initRadius, positi
   for (const point of currentRestriction) {
     const rowPoint = Math.floor(point / boardSize);
     const colPoint = point % boardSize;
-    const deltaRow = Math.sign(rowPoint - rowPosition);
-    const deltaCol = Math.sign(colPoint - colPosition);
-    const deltaPoint = deltaRow * boardSize + deltaCol;
+    const deltaRow = rowPoint - rowPosition;
+    const deltaCol = colPoint - colPosition;
+    const deltaRowSign = Math.sign(rowPoint - rowPosition);
+    const deltaColSign = Math.sign(colPoint - colPosition);
+    const deltaPoint = deltaRowSign * boardSize + deltaColSign;
     const radius = Math.abs(deltaRow || deltaCol);
-    for (let step = radius; step < initRadius; step += 1) {
+    for (let step = 1; step <= initRadius - radius; step += 1) {
       const nextPoint = point + deltaPoint * step;
-      extraRestriction.push(nextPoint);
+      const rowNextPoint = Math.floor(nextPoint / boardSize);
+      const deltaRowNextPoint = rowNextPoint - rowPoint;
+      const deltaRowNextPointSign = Math.sign(deltaRowNextPoint);
+      if (deltaRowNextPointSign === deltaRowSign) {
+        extraRestriction.push(nextPoint);
+      }
     }
   }
   return extraRestriction;
+}
+
+export function getDescription(selfUnit, otherUnit, boardSize) {
+  const {
+    character: {
+      attack: selfAttack,
+      defense: selfDefense,
+      range: selfRange,
+      distance: selfDistance,
+      health: selfHealth,
+    },
+    position: selfPosition,
+  } = selfUnit;
+  const {
+    character: {
+      attack: otherAttack,
+      defense: otherDefense,
+      range: otherRange,
+      health: otherHealth,
+    },
+    position: otherPosition,
+  } = otherUnit;
+  const selfDamage = calcDamage(selfAttack, otherDefense);
+  const otherDamage = calcDamage(otherAttack, selfDefense);
+  const distance = distanceMetric(selfPosition, otherPosition, boardSize);
+  const outDistCoef = (distance - otherRange > 0) ? 0 : 1;
+  const selfDistCoef = (distance - selfRange > 0) ? 0 : 1;
+  const selfKillFactor = (selfHealth - otherDamage < 0)
+    && (otherHealth - selfDamage > 0) ? Infinity : 0;
+  const possibleAttackRate = selfDamage + 0.1 * (100 - otherHealth);
+  const possibleAttackCells = getPropagation(otherPosition, selfRange, boardSize);
+  const possibleMoveCells = getPropagation(selfPosition, selfDistance, boardSize);
+  const possibleTarget = possibleMoveCells
+    .filter((element) => possibleAttackCells.includes(element));
+  const attackRate = possibleAttackRate * selfDistCoef;
+  const retreatRate = (otherDamage + 0.1 * (100 - selfHealth)
+    + selfKillFactor) * outDistCoef * 0.99;
+  const resultRate = Math.max(attackRate, retreatRate);
+  // console.log('selfDamage', selfDamage);
+  // console.log('otherDamage', otherDamage);
+  // console.log('selfDistCoef', selfDistCoef);
+  // console.log('distance', distance);
+  // console.log('otherRange', otherRange);
+  // console.log('outDistCoef', outDistCoef);
+  // console.log('otherHealth', otherHealth);
+  // console.log('selfHealth', selfHealth);
+  // console.log('selfKillCoef', selfKillCoef);
+  // console.log('attackRate', attackRate);
+  // console.log('retreatRate', retreatRate);
+  return {
+    selfPosition,
+    otherPosition,
+    possibleAttackRate,
+    possibleTarget,
+    attackRate,
+    retreatRate,
+    resultRate,
+  };
 }

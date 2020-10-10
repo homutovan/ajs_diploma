@@ -2,37 +2,54 @@ import { getTotalPropBySide, changePlayers } from './utils';
 
 export default class Team {
   constructor(positionList) {
+    // console.log('team constructor');
     this.positionList = positionList;
     this.init();
   }
 
-  * [Symbol.iterator]() {
-    this.positionList = this.positionList
-      .filter((element) => element.character.health > 0);
-    this.calcStatistics();
-    this.allIndex = this.getAllIndex();
-    for (const position of this.positionList) {
-      yield position;
-    }
-  }
-
   init() {
+    // console.log('team init');
     this.statistics = {};
     this.initTotalHealth = {};
     this.teamSize = {};
+    this.sideIndex = {};
+    this.allIndex = 0;
     this.currentTurn = 0;
     this.gameStage = 0;
     this.positionList.map((element) => element.team = this);
+    this.updateIndex();
 
     for (const side in changePlayers) {
       if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {
         this.initTotalHealth[side] = this.getTotalHealth(side);
-        this.teamSize[side] = this.getTeamPosition(side).length;
+        this.teamSize[side] = this.sideIndex[side].length;
       }
     }
   }
 
+  updateIndex() {
+    // this.allIndex = this.getAllIndex();
+    // console.log('update');
+    this.sideIndex.evil = this.getTeamPosition('evil');
+    this.sideIndex.good = this.getTeamPosition('good');
+    this.allIndex = [...this.sideIndex.evil, ...this.sideIndex.good];
+  }
+
+  * [Symbol.iterator]() {
+    // console.log('iter');
+    this.positionList = this.positionList
+      .filter((element) => element.character.health > 0);
+    this.updateIndex();
+    this.calcStatistics();
+    for (const position of this.positionList) {
+      // console.log(position);
+      yield position;
+    }
+  }
+
   getTeamPosition(side) {
+    // console.log(arguments);
+    // console.log('getTeamPosition', side);
     return this.positionList
       .map((element) => element.character.side === side && element.position)
       .filter((element) => element !== false);
@@ -43,9 +60,9 @@ export default class Team {
       .map((element) => element.character);
   }
 
-  getAllIndex() {
-    return [...this.getTeamPosition('good'), ...this.getTeamPosition('evil')];
-  }
+  // getAllIndex() {
+  //   return [...this.getTeamPosition('good'), ...this.getTeamPosition('evil')];
+  // }
 
   getPositionByIndex(index) {
     return this.positionList.find((el) => el.position === index);
@@ -69,8 +86,8 @@ export default class Team {
     };
     for (const side in changePlayers) {
       if (Object.prototype.hasOwnProperty.call(changePlayers, side)) {
-        const numberCharacters = this.getTeamPosition(side).length;
-        const numberCharactersEnemy = this.getTeamPosition(changePlayers[side]).length;
+        const numberCharacters = this.sideIndex[side].length;
+        const numberCharactersEnemy = this.sideIndex[changePlayers[side]].length;
         const totalHealth = this.getTotalHealth(side);
         const currTotalHealthEnemy = this.getTotalHealth(changePlayers[side]);
         const totalDamage = this.initTotalHealth[changePlayers[side]] - currTotalHealthEnemy;

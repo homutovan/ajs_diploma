@@ -110,7 +110,7 @@ export default class GameController {
   }
 
   gameRun() {
-    console.log('game run');
+    // console.log('game run');
     // this.timerList.push(setInterval(() => this.timer += 1, 1000));
     this.demo = this.demoState;
     this.turn = this.turn;
@@ -167,12 +167,13 @@ export default class GameController {
     this.team.currentTurn = this._turn;
     this.team.gameStage = this.gameStage;
     this.team.score = this.score;
-    this.playerCharacterCells = this.team.getTeamPosition(this.side);
-    this.enemyCharacterCells = this.team.getTeamPosition(this.enemySide);
-    this.characterCells = this.team.getAllIndex();
     this.gamePlay.redrawPositions();
+    this.playerCharacterCells = this.team.sideIndex[this.side];
+    this.enemyCharacterCells = this.team.sideIndex[this.enemySide];
+    this.characterCells = this.team.allIndex;
     if (this.checkWinner()) return null;
     this.enemyAction();
+    // console.log('end set turn');
     return null;
   }
 
@@ -215,7 +216,7 @@ export default class GameController {
   }
 
   gameNext() {
-    console.log('next');
+    // console.log('next');
     this.saveTeam = this.team.getCharacters();
     this.team.totalLevelUp();
     this.teamSize = this.gameStage - Math.floor(this.gameStage / 3);
@@ -241,6 +242,7 @@ export default class GameController {
   }
 
   async gameAction(index) {
+    // console.log('gameAction');
     await this.action(index);
   }
 
@@ -328,7 +330,6 @@ export default class GameController {
 
   distributionCells() {
     this.transitionСells = this.activePosition.getTransition();
-    this.attackСells = this.activePosition.getAttack()
-      .filter((element) => this.enemyCharacterCells.includes(element));
+    this.attackСells = this.activePosition.getAttack();
   }
 }
