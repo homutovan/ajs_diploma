@@ -23,7 +23,7 @@ export default class Estimator {
         this.randomStrategy();
       }
     } else {
-      this.randomStrategy();
+      this.smartStrategy();
     }
     return null;
   }
