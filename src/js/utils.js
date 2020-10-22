@@ -118,6 +118,7 @@ export function getDescription(selfUnit, otherUnit, boardSize) {
       range: selfRange,
       distance: selfDistance,
       health: selfHealth,
+      level: selfLevel,
     },
     position: selfPosition,
   } = selfUnit;
@@ -136,7 +137,7 @@ export function getDescription(selfUnit, otherUnit, boardSize) {
   const outDistCoef = (distance - otherRange > 0) ? 0 : 1;
   const selfDistCoef = (distance - selfRange > 0) ? 0 : 1;
   const selfKillFactor = (selfHealth - otherDamage < 0)
-    && (otherHealth - selfDamage > 0) ? Infinity : 0;
+    && (otherHealth - selfDamage > 0) ? selfLevel * 10 : 0;
   const possibleAttackRate = selfDamage + 0.1 * (100 - otherHealth);
   const possibleAttackCells = getPropagation(otherPosition, selfRange, boardSize);
   const possibleMoveCells = getPropagation(selfPosition, selfDistance, boardSize);
@@ -146,17 +147,6 @@ export function getDescription(selfUnit, otherUnit, boardSize) {
   const retreatRate = (otherDamage + 0.1 * (100 - selfHealth)
     + selfKillFactor) * outDistCoef * 0.99;
   const resultRate = Math.max(attackRate, retreatRate);
-  // console.log('selfDamage', selfDamage);
-  // console.log('otherDamage', otherDamage);
-  // console.log('selfDistCoef', selfDistCoef);
-  // console.log('distance', distance);
-  // console.log('otherRange', otherRange);
-  // console.log('outDistCoef', outDistCoef);
-  // console.log('otherHealth', otherHealth);
-  // console.log('selfHealth', selfHealth);
-  // console.log('selfKillCoef', selfKillCoef);
-  // console.log('attackRate', attackRate);
-  // console.log('retreatRate', retreatRate);
   return {
     selfPosition,
     otherPosition,

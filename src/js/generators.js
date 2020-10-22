@@ -50,8 +50,11 @@ export function generatePosition(characterList, boardSize, playerSide) {
   for (let row = 0; row < rowsNumber; row += 1) {
     availablePosition = [...availablePosition, ...vertLine.map((el) => el + row)];
   }
-  const position = availablePosition.sort(() => Math.random() - 0.5).slice(0, characterList.length);
-  return characterList.map((character, i) => new PositionedCharacter(character, position[i], boardSize));
+  const position = availablePosition.sort(() => Math.random() - 0.5)
+    .slice(0, characterList.length);
+  return characterList.map(
+    (character, i) => new PositionedCharacter(character, position[i], boardSize),
+  );
 }
 
 export function* generateTheme(startTheme = 0) {

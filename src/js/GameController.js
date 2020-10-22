@@ -21,12 +21,9 @@ export default class GameController {
     if (this.stateService.loadStatus) {
       this.loadGame();
     } else {
+      this.gamePlay.showError('Bad autosave!');
       this.newGame(12, 20, 'evil', true);
     }
-    // console.log(this.timerList);
-    // this.timerList.push(2);
-    // console.log(this.timerList);
-    // this.timerlist.push(setInterval(() => this.timer += 1, 1000));
   }
 
   init() {
@@ -49,7 +46,6 @@ export default class GameController {
   }
 
   newGame(boardSize, teamSize, side, demo) {
-    // console.log('newGame');
     this.demo = demo;
     this.score = 0;
     this.saveTeam = [];
@@ -62,7 +58,6 @@ export default class GameController {
   }
 
   loadGame(name = 'autosave') {
-    // console.log('loadGame');
     this.gameState.recoverGame(name);
   }
 
@@ -110,8 +105,7 @@ export default class GameController {
   }
 
   gameRun() {
-    // console.log('game run');
-    // this.timerList.push(setInterval(() => this.timer += 1, 1000));
+    this.timerList.push(setInterval(() => this.timer += 1, 1000));
     this.demo = this.demoState;
     this.turn = this.turn;
   }
@@ -144,13 +138,11 @@ export default class GameController {
   }
 
   set gameStage(value) {
-    // console.log('gameStage');
     this._gameStage = value;
     this.init();
     this.team.highscore = this.highscore;
     this.timer = 0;
     this.turn = 0;
-    // console.log('end set stage');
   }
 
   get gameStage() {
@@ -158,12 +150,10 @@ export default class GameController {
   }
 
   set turn(value) {
-    // console.log('set turn');
     if (value - this._turn === 1) {
       [this.side, this.enemySide] = [this.enemySide, this.side];
     }
     this._turn = value;
-    // console.log(this.timerList);
     this.team.currentTurn = this._turn;
     this.team.gameStage = this.gameStage;
     this.team.score = this.score;
@@ -173,7 +163,6 @@ export default class GameController {
     this.characterCells = this.team.allIndex;
     if (this.checkWinner()) return null;
     this.enemyAction();
-    // console.log('end set turn');
     return null;
   }
 
@@ -216,11 +205,9 @@ export default class GameController {
   }
 
   gameNext() {
-    // console.log('next');
     this.saveTeam = this.team.getCharacters();
     this.team.totalLevelUp();
     this.teamSize = this.gameStage - Math.floor(this.gameStage / 3);
-    // console.log(`team size: ${this.teamSize}`);
     this.gameStage += 1;
   }
 
@@ -229,7 +216,6 @@ export default class GameController {
   }
 
   enemyAction() {
-    // console.log('enemyAction');
     if (this.side === this.estimator.side || this.demo) {
       this.estimator.requestStrategy();
     }
@@ -242,7 +228,6 @@ export default class GameController {
   }
 
   async gameAction(index) {
-    // console.log('gameAction');
     await this.action(index);
   }
 

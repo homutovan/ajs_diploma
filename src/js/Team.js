@@ -2,13 +2,11 @@ import { getTotalPropBySide, changePlayers } from './utils';
 
 export default class Team {
   constructor(positionList) {
-    // console.log('team constructor');
     this.positionList = positionList;
     this.init();
   }
 
   init() {
-    // console.log('team init');
     this.statistics = {};
     this.initTotalHealth = {};
     this.teamSize = {};
@@ -28,28 +26,22 @@ export default class Team {
   }
 
   updateIndex() {
-    // this.allIndex = this.getAllIndex();
-    // console.log('update');
     this.sideIndex.evil = this.getTeamPosition('evil');
     this.sideIndex.good = this.getTeamPosition('good');
     this.allIndex = [...this.sideIndex.evil, ...this.sideIndex.good];
   }
 
   * [Symbol.iterator]() {
-    // console.log('iter');
     this.positionList = this.positionList
       .filter((element) => element.character.health > 0);
     this.updateIndex();
     this.calcStatistics();
     for (const position of this.positionList) {
-      // console.log(position);
       yield position;
     }
   }
 
   getTeamPosition(side) {
-    // console.log(arguments);
-    // console.log('getTeamPosition', side);
     return this.positionList
       .map((element) => element.character.side === side && element.position)
       .filter((element) => element !== false);
@@ -59,10 +51,6 @@ export default class Team {
     return this.positionList
       .map((element) => element.character);
   }
-
-  // getAllIndex() {
-  //   return [...this.getTeamPosition('good'), ...this.getTeamPosition('evil')];
-  // }
 
   getPositionByIndex(index) {
     return this.positionList.find((el) => el.position === index);

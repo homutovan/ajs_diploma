@@ -21,23 +21,11 @@ export default class PositionedCharacter {
     this.team = '';
   }
 
-  // get position() {
-  //   return this._position;
-  // }
-
-  // set position(value) {
-  //   this._position = value;
-  // }
-
   getTransition() {
-    // console.log('getTransition');
-    // console.log(this.team.allIndex);
     const { distance } = this.character;
     const { position, boardSize } = this;
     const propogation = getPropagation(this.position, distance, this.boardSize);
-    // console.log(propogation);
     const restriction = this.team.allIndex;
-    // console.log(restriction);
     const extraRestriction = getExtraRestriction(
       propogation,
       restriction,
