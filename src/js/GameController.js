@@ -292,25 +292,23 @@ export default class GameController {
   activatePosition(index) {
     this.deactivatePosition();
     const position = this.team.getPositionByIndex(index);
-    if (position) {
-      if (position.character.side === this.side) {
-        this.activePosition = position;
-        this.gamePlay.selectCell(index);
-        this.distributionCells();
-        this.gamePlay.highlightCell(this.transitionСells);
-      }
+    if (!position) return null;
+    if (position.character.side === this.side) {
+      this.activePosition = position;
+      this.gamePlay.selectCell(index);
+      this.distributionCells();
+      this.gamePlay.highlightCell(this.transitionСells);
     }
   }
 
   deactivatePosition() {
-    if (this.activePosition) {
-      this.gamePlay.deselectCell(this.activePosition.position);
-      this.gamePlay.dehighlightCell();
-      this.gamePlay.setCursor('auto');
-      this.action = this.activatePosition;
-      this.transitionСells = [];
-      this.attackСells = [];
-    }
+    if (!this.activePosition) return null;
+    this.gamePlay.deselectCell(this.activePosition.position);
+    this.gamePlay.dehighlightCell();
+    this.gamePlay.setCursor('auto');
+    this.action = this.activatePosition;
+    this.transitionСells = [];
+    this.attackСells = [];
   }
 
   distributionCells() {
