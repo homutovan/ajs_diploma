@@ -7,16 +7,39 @@ export function calcTileType(index, board) {
   return board[(index - (index % len)) / len][index % len];
 }
 
+export function getCoordinates(pointA, pointB, boardSize) {
+  return {
+    pointAX: pointA % boardSize,
+    pointBX: pointB % boardSize,
+    pointAY: Math.floor(pointA / boardSize),
+    pointBY: Math.floor(pointB / boardSize),
+  };
+}
+
 export function distanceMetric(pointA, pointB, boardSize) {
-  const pointAX = pointA % boardSize;
-  const pointBX = pointB % boardSize;
-  const pointAY = Math.floor(pointA / boardSize);
-  const pointBY = Math.floor(pointB / boardSize);
+  const {
+    pointAX,
+    pointBX,
+    pointAY,
+    pointBY,
+  } = getCoordinates(pointA, pointB, boardSize);
   let distance = ((pointAX - pointBX) ** 2 + (pointAY - pointBY) ** 2) ** 0.5;
   if (!Number.isInteger(distance)) {
     distance /= Math.SQRT2;
   }
   return +distance.toFixed(1);
+}
+
+export function rangeMetric(pointA, pointB, boardSize) {
+  const {
+    pointAX,
+    pointBX,
+    pointAY,
+    pointBY,
+  } = getCoordinates(pointA, pointB, boardSize);
+  const deltaX = Math.abs(pointBX - pointAX);
+  const deltaY = Math.abs(pointBY - pointAY);
+  return Math.max(deltaX, deltaY);
 }
 
 export function getBoard(boardSize) {
@@ -37,6 +60,13 @@ export function getPropagation(index, radius, boardSize) {
     .filter((element) => (element !== index)
       && metric(element) <= radius
       && Number.isInteger(metric(element)));
+}
+
+export function getRangeArea(index, radius, boardSize) {
+  const metric = (element) => rangeMetric(element, index, boardSize);
+  return getBoardIndex(boardSize)
+    .filter((element) => (element !== index)
+      && metric(element) <= radius);
 }
 
 export function getRandomElement(list) {
@@ -139,7 +169,7 @@ export function getDescription(selfUnit, otherUnit, boardSize) {
   const selfKillFactor = (selfHealth - otherDamage < 0)
     && (otherHealth - selfDamage > 0) ? selfLevel * 10 : 0;
   const possibleAttackRate = selfDamage + 0.1 * (100 - otherHealth);
-  const possibleAttackCells = getPropagation(otherPosition, selfRange, boardSize);
+  const possibleAttackCells = getRangeArea(otherPosition, selfRange, boardSize);
   const possibleMoveCells = getPropagation(selfPosition, selfDistance, boardSize);
   const possibleTarget = possibleMoveCells
     .filter((element) => possibleAttackCells.includes(element));

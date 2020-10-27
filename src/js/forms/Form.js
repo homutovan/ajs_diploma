@@ -17,7 +17,6 @@ export default class Form {
   }
 
   close() {
-    console.log('close');
     this.modal.style.display = 'none';
     this.unregisterEvents();
     this.game.gameRun();

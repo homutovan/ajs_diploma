@@ -18,7 +18,7 @@ export default class GameState {
     return this._highscore;
   }
 
-  init(name = 'autosave') {
+  init(name = 'autosave-save') {
     try {
       this.state = this.driver.load(name);
     } catch (e) {
@@ -43,6 +43,7 @@ export default class GameState {
     this.state.timer = this.game.timer;
     this.state.score = this.game.score;
     this.state.boardSize = this.game.boardSize;
+    this.state.teamSize = this.game.team.teamSize;
     this.state.initTotalHealth = this.game.team.initTotalHealth;
     this.state.demo = this.game.demo;
     this.state.initialSide = this.game.initialSide;
@@ -62,7 +63,7 @@ export default class GameState {
   }
 
   recoverGame(name) {
-    if (name !== 'autosave') {
+    if (name !== 'autosave-save') {
       this.init(name);
     }
     this.game.score = this.state.score;
@@ -78,7 +79,7 @@ export default class GameState {
     this.game.turn = this.state.currentTurn + 1;
   }
 
-  saveTurn(name = 'auto') {
+  saveTurn(name = 'autosave') {
     this.state.board = [...this.game.team]
       .map((position) => this.teamToObj(position));
     this.driver.save(this.state, name);

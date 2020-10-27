@@ -1,5 +1,10 @@
 import Character from './Character';
-import { getPropagation, getExtraRestriction, changePlayers } from './utils';
+import {
+  getPropagation,
+  getRangeArea,
+  getExtraRestriction,
+  changePlayers,
+} from './utils';
 
 export default class PositionedCharacter {
   constructor(character, position, boardSize) {
@@ -40,7 +45,7 @@ export default class PositionedCharacter {
 
   getAttackArea() {
     const { range } = this.character;
-    return getPropagation(this.position, range, this.boardSize);
+    return getRangeArea(this.position, range, this.boardSize);
   }
 
   getAttack() {

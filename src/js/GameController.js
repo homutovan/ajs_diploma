@@ -21,8 +21,8 @@ export default class GameController {
     if (this.stateService.loadStatus) {
       this.loadGame();
     } else {
-      this.gamePlay.showError('Bad autosave!');
       this.newGame(12, 20, 'evil', true);
+      this.gamePlay.showError('Bad autosave!');
     }
   }
 
@@ -57,7 +57,7 @@ export default class GameController {
     this.gameStage = 1;
   }
 
-  loadGame(name = 'autosave') {
+  loadGame(name = 'autosave-save') {
     this.gameState.recoverGame(name);
   }
 

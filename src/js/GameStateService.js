@@ -4,7 +4,7 @@ export default class GameStateService {
   }
 
   save(state, name) {
-    this.storage.setItem(`${name}save`, JSON.stringify(state));
+    this.storage.setItem(`${name}-save`, JSON.stringify(state));
   }
 
   set highscore(value) {
@@ -16,7 +16,7 @@ export default class GameStateService {
   }
 
   delete(name) {
-    this.storage.removeItem(name);
+    this.storage.removeItem(`${name}-save`);
   }
 
   load(name) {
@@ -36,8 +36,9 @@ export default class GameStateService {
     const len = this.storage.length;
     for (let i = 0; i < len; i += 1) {
       const key = this.storage.key(i);
-      if (key.endsWith('save')) {
-        saveList.push(key);
+      if (key.endsWith('-save')) {
+        const savename = key.substr(0, key.length - 5);
+        saveList.push(savename);
       }
     }
     return saveList;

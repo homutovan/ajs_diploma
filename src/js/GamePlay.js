@@ -14,6 +14,7 @@ import SaveGameForm from './forms/SaveGameForm';
 import LoadGameForm from './forms/LoadGameForm';
 import GameOverForm from './forms/GameOverForm';
 import WinPlayerForm from './forms/WinPlayerForm';
+import Toast from './toast/Toast';
 
 export default class GamePlay {
   constructor() {
@@ -53,6 +54,7 @@ export default class GamePlay {
       throw new Error('container is not HTMLElement');
     }
     this.container = container;
+    this.toast = new Toast(this.container);
   }
 
   /**
@@ -127,7 +129,6 @@ export default class GamePlay {
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
-
     for (const position of this.game.team) {
       const cellEl = this.boardEl.children[position.position];
       const charEl = document.createElement('div');
@@ -282,11 +283,12 @@ export default class GamePlay {
   }
 
   showError(message) {
-    alert(message);
+    console.log('showError');
+    this.toast.showError(message);
   }
 
   static showMessage(message) {
-    alert(message);
+    this.toast.showMessage(message);
   }
 
   selectCell(index, color = 'yellow') {
