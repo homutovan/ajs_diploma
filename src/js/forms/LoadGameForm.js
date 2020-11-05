@@ -12,6 +12,6 @@ export default class LoadGameForm extends Form {
   onSubmit(event) {
     const data = this.eventHandler(event);
     const name = data.get('load-input');
-    this.game.loadGame(name);
+    this.game.loadGame(`${name}-save`);
   }
 }

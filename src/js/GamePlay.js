@@ -283,7 +283,6 @@ export default class GamePlay {
   }
 
   showError(message) {
-    console.log('showError');
     this.toast.showError(message);
   }
 
